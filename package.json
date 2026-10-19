@@ -1,0 +1,14 @@
+{
+  "name": "findwise-semantic-search",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev -w backend",
+    "dev:frontend": "npm run dev -w frontend",
+    "spike:embeddings": "npm run spike:embeddings -w backend",
+    "spike:hnsw": "npm run spike:hnsw -w backend"
+  }
+}
