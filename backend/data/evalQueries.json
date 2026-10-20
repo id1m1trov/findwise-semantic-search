@@ -114,5 +114,26 @@
       "note": "Filters exclude every product."
     }
   ],
-  "heldOut": []
+  "heldOut": [
+    {
+      "query": "The sunlight keeps waking me up too early. I need something to make my bedroom darker.",
+      "relevant": ["HOM-005"],
+      "mustNotInTop3": [],
+      "note": "Written by the developer before seeing results. Expected first; unrelated bedroom or sleeping products should not rank above it."
+    },
+    {
+      "query": "I'm going straight to the gym after work and need something to carry my clothes, trainers and a towel.",
+      "filters": { "category": "Fitness" },
+      "relevant": ["FIT-009"],
+      "mustNotInTop3": [],
+      "note": "Written by the developer before seeing results. Expected first; shoes, bottles and gym equipment should not be prioritised."
+    },
+    {
+      "query": "I'm tired of cleaning dust and crumbs off the floor myself. Is there something that could do it for me?",
+      "filters": { "maxPrice": 250 },
+      "relevant": ["HOM-008"],
+      "mustNotInTop3": [],
+      "note": "Written by the developer before seeing results. Expected first. The 250 EUR cap excludes no product (most expensive is 229 EUR)."
+    }
+  ]
 }

@@ -67,6 +67,27 @@ similarity, not a percentage) and `relevance` (`strong` / `good`). `meta.outcome
 `results`, `no_filter_matches` (filters exclude everything) or `no_relevant_matches`
 (nothing similar enough). Invalid parameters return `400` with the field and reason.
 
+## Evaluation and known limitations
+
+`npm run eval` measures the search implementation (HNSW vs exact search: identical in every
+case) separately from the embedding model's relevance (hit@3 0.91 / MRR 0.88 on the baseline
+queries, 0.67 / 0.75 on three held-out queries written before seeing results). Full results
+and diagnostics: [docs/evaluation](docs/evaluation/README.md).
+
+Known limitations of the current model and set-up:
+
+- Surface word overlap can beat meaning: "keep my drink hot on a camping trip" ranks a hot
+  water bottle just above the thermos.
+- Topic is understood better than direction or negation ("make my bedroom darker" finds
+  lamps; "*without* a power outlet" still finds the wall charger).
+- Long, conversational queries dilute the actual need and produce lower scores.
+- English only.
+- The 0.30 similarity cut-off reliably detects "nothing relevant", but many loosely related
+  products also pass it, so the relevance labels can overstate weak matches.
+- The server imports `products.json` only when its database is empty; later catalog edits
+  need `npm run ingest` (a running server picks them up automatically). There is
+  deliberately no HTTP ingestion endpoint, as it would be an unauthenticated write API.
+
 ### Spikes
 
 Throwaway checks kept from the setup phase:

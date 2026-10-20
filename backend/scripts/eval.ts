@@ -46,6 +46,7 @@ const repo = new ProductRepository(openDatabase(":memory:"));
 repo.syncCatalog(loadCatalog(config.catalogFile));
 const products = repo.listAll();
 const byId = new Map(products.map((p) => [p.id, p]));
+const skuToId = new Map(products.map((p) => [p.sku, p.id]));
 const embedder = new TransformersEmbedder(config.embeddingModel, config.embeddingDimension);
 
 const toFilters = (f: EvalFilters = {}): ProductFilters => ({
@@ -71,6 +72,7 @@ interface CaseResult {
   bestRelevantSimilarity: number;
   topSimilarity: number;
   recallAt10: number; // HNSW vs exact
+  ranked: { sku: string; similarity: number }[];
 }
 
 async function runRankingCase(c: RankingCase, prepared: Awaited<ReturnType<typeof prepare>>): Promise<CaseResult> {
@@ -93,7 +95,18 @@ async function runRankingCase(c: RankingCase, prepared: Awaited<ReturnType<typeo
     bestRelevantSimilarity: Math.max(...ranked.filter((r) => c.relevant.includes(r.sku)).map((r) => r.similarity)),
     topSimilarity: ranked[0]?.similarity ?? 0,
     recallAt10: hnsw.slice(0, k).filter((h) => exactTop.has(h.id)).length / k,
+    ranked,
   };
+}
+
+/** Top results as the app would label them: strong / good / hidden (below the cut-off). */
+function printRanking(c: RankingCase, r: CaseResult) {
+  const band = (s: number) => (s >= config.strongSimilarity ? "strong" : s >= config.minSimilarity ? "good" : "hidden");
+  r.ranked.slice(0, 8).forEach((x, i) => {
+    const mark = c.relevant.includes(x.sku) ? "  <- expected" : "";
+    console.log(`      ${pad(i + 1, 3)}${x.similarity.toFixed(3)}  ${pad(band(x.similarity), 7)}${x.sku}  ${byId.get(skuToId.get(x.sku)!)!.name}${mark}`);
+  });
+  console.log("");
 }
 
 function summarise(results: CaseResult[]) {
@@ -106,7 +119,7 @@ function summarise(results: CaseResult[]) {
   };
 }
 
-async function runGroup(name: string, cases: RankingCase[], prepared: Awaited<ReturnType<typeof prepare>>, print: boolean) {
+async function runGroup(name: string, cases: RankingCase[], prepared: Awaited<ReturnType<typeof prepare>>, print: boolean, detail = false) {
   const results: CaseResult[] = [];
   if (print && cases.length) {
     console.log(`\n## ${name}\n`);
@@ -121,6 +134,7 @@ async function runGroup(name: string, cases: RankingCase[], prepared: Awaited<Re
         `${pad(label.slice(0, 50), 52)}${pad(r.firstRelevantRank ?? "-", 6)}${pad(r.bestRelevantSimilarity.toFixed(3), 10)}` +
           `${pad(r.top3.join(" "), 27)}${r.trapsInTop3.join(" ") || "-"}`,
       );
+      if (detail) printRanking(c, r);
     }
   }
   return results;
@@ -137,7 +151,7 @@ const rankingGroups: [string, RankingCase[]][] = [
 
 console.log(`# Evaluation: ${products.length} products, model ${config.embeddingModel}`);
 const allResults: Record<string, CaseResult[]> = {};
-for (const [name, cases] of rankingGroups) allResults[name] = await runGroup(name, cases, current, true);
+for (const [name, cases] of rankingGroups) allResults[name] = await runGroup(name, cases, current, true, name.startsWith("Held-out"));
 
 console.log("\n## No-result cases (threshold " + config.minSimilarity + ")\n");
 const service = new SearchService({

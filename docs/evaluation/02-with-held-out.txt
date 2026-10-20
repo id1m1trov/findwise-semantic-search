@@ -1,0 +1,79 @@
+# Evaluation: 72 products, model Xenova/all-MiniLM-L6-v2
+
+## Semantic relevance (no filters)
+
+query                                               rank  best sim  top 3                      traps in top 3
+something to keep my drink hot on a camping trip    2     0.507     HOM-001 OUT-001 FIT-001    -
+water bottle for the gym                            1     0.641     FIT-001 KIT-007 FIT-002    -
+something to keep my bed warm in winter             8     0.335     OUT-003 HOM-006 CLO-007    -
+light for my tent at night                          1     0.511     OUT-005 OUT-007 OUT-004    -
+something soft to sleep on while camping            1     0.478     OUT-003 OUT-002 HOM-006    -
+stay cool while running in summer                   1     0.573     FIT-006 CLO-004 CLO-002    -
+charge my phone without a power outlet              1     0.380     ELE-003 OUT-006 ELE-009    ELE-009
+block out noise on a long flight                    1     0.411     ELE-001 HOM-012 HOM-010    -
+gift for a coffee lover                             1     0.539     KIT-005 KIT-004 KIT-003    -
+yoga mat                                            1     0.760     FIT-003 ELE-005 FIT-007    -
+sneakers                                            1     0.497     CLO-001 CLO-012 CLO-002    -
+
+## Combined (query + filters)
+
+query                                               rank  best sim  top 3                      traps in top 3
+keep my drink hot [{"category":"Kitchen & Drinkwar  1     0.345     KIT-001 KIT-003 KIT-011    KIT-011
+keep drinks cold during workouts [{"category":"Fit  1     0.464     FIT-001 FIT-006 FIT-002    -
+warm jacket for winter [{"maxPrice":60}]            1     0.490     CLO-006 CLO-011 FIT-006    -
+
+## Held-out (written before seeing results)
+
+query                                               rank  best sim  top 3                      traps in top 3
+The sunlight keeps waking me up too early. I need   4     0.336     OUT-004 ELE-008 OUT-005    -
+      1  0.362  good   OUT-004  Rechargeable LED Headlamp
+      2  0.347  good   ELE-008  E-Reader with Warm Light
+      3  0.338  good   OUT-005  Collapsible LED Lantern
+      4  0.336  good   HOM-005  Thermal Blackout Curtains (2 Panels)  <- expected
+      5  0.303  good   CLO-011  Wide-Brim Sun Hat
+      6  0.298  hidden HOM-004  LED Desk Lamp with USB Port
+      7  0.290  hidden HOM-012  Silent Oak Wall Clock
+      8  0.257  hidden HOM-011  Cedarwood Soy Candle
+
+I'm going straight to the gym after work and need   1     0.622     FIT-009 FIT-006 FIT-002    -
+      1  0.622  strong FIT-009  Gym Duffel Bag 35 L  <- expected
+      2  0.413  good   FIT-006  Evaporative Cooling Towel
+      3  0.364  good   FIT-002  Protein Shaker Bottle 700 ml
+      4  0.354  good   FIT-001  Insulated Sports Bottle 750 ml
+      5  0.353  good   FIT-005  Resistance Bands Set
+      6  0.328  good   FIT-003  Non-Slip Yoga Mat 6 mm
+      7  0.312  good   FIT-008  Ball-Bearing Jump Rope
+      8  0.257  hidden FIT-007  Ridged Foam Roller
+
+I'm tired of cleaning dust and crumbs off the floo  1     0.449     HOM-008 FIT-006 OUT-009    -
+      1  0.449  good   HOM-008  Lidar Robot Vacuum Cleaner  <- expected
+      2  0.211  hidden FIT-006  Evaporative Cooling Towel
+      3  0.188  hidden OUT-009  Emergency Rain Poncho (3-Pack)
+      4  0.170  hidden CLO-008  Merino Wool Base Layer Top
+      5  0.168  hidden CLO-002  Trail Running Shoes
+      6  0.168  hidden ELE-005  Extended Gaming Mouse Pad
+      7  0.156  hidden ELE-004  Laptop Cooling Pad
+      8  0.154  hidden CLO-009  Thermal Ski Gloves
+
+
+## No-result cases (threshold 0.3)
+
+PASS  spaceship engine parts                                                 no_relevant_matches  (top sim 0.242)
+PASS  replacement car tyres                                                  no_relevant_matches  (top sim 0.230)
+PASS  spaceship engine parts {"category":"Kitchen & Drinkware"}              no_relevant_matches  (top sim 0.242)
+PASS  noise-cancelling headphones {"category":"Electronics","maxPrice":5}    no_filter_matches  (top sim n/a)
+
+## Summary
+
+group                                       cases  hit@3   MRR     traps  HNSW recall@10 vs exact
+Semantic relevance (no filters)             11     0.91    0.88    1      1.000
+Combined (query + filters)                  3      1.00    1.00    1      1.000
+Held-out (written before seeing results)    3      0.67    0.75    0      1.000
+No-result cases: 4/4 passed
+
+Threshold calibration: lowest best-relevant similarity 0.335, highest no-result similarity 0.242 (current cut-off 0.3, strong 0.45)
+
+## Embedding text recipe (semantic group)
+
+name + description (current):         hit@3 0.91  MRR 0.88  traps 1
+name + category + description:        hit@3 0.91  MRR 0.88  traps 1

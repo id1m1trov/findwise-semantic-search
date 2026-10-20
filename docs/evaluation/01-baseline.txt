@@ -1,0 +1,44 @@
+# Evaluation: 72 products, model Xenova/all-MiniLM-L6-v2
+
+## Semantic relevance (no filters)
+
+query                                               rank  best sim  top 3                      traps in top 3
+something to keep my drink hot on a camping trip    2     0.507     HOM-001 OUT-001 FIT-001    -
+water bottle for the gym                            1     0.641     FIT-001 KIT-007 FIT-002    -
+something to keep my bed warm in winter             8     0.335     OUT-003 HOM-006 CLO-007    -
+light for my tent at night                          1     0.511     OUT-005 OUT-007 OUT-004    -
+something soft to sleep on while camping            1     0.478     OUT-003 OUT-002 HOM-006    -
+stay cool while running in summer                   1     0.573     FIT-006 CLO-004 CLO-002    -
+charge my phone without a power outlet              1     0.380     ELE-003 OUT-006 ELE-009    ELE-009
+block out noise on a long flight                    1     0.411     ELE-001 HOM-012 HOM-010    -
+gift for a coffee lover                             1     0.539     KIT-005 KIT-004 KIT-003    -
+yoga mat                                            1     0.760     FIT-003 ELE-005 FIT-007    -
+sneakers                                            1     0.497     CLO-001 CLO-012 CLO-002    -
+
+## Combined (query + filters)
+
+query                                               rank  best sim  top 3                      traps in top 3
+keep my drink hot [{"category":"Kitchen & Drinkwar  1     0.345     KIT-001 KIT-003 KIT-011    KIT-011
+keep drinks cold during workouts [{"category":"Fit  1     0.464     FIT-001 FIT-006 FIT-002    -
+warm jacket for winter [{"maxPrice":60}]            1     0.490     CLO-006 CLO-011 FIT-006    -
+
+## No-result cases (threshold 0.3)
+
+PASS  spaceship engine parts                                                 no_relevant_matches  (top sim 0.242)
+PASS  replacement car tyres                                                  no_relevant_matches  (top sim 0.230)
+PASS  spaceship engine parts {"category":"Kitchen & Drinkware"}              no_relevant_matches  (top sim 0.242)
+PASS  noise-cancelling headphones {"category":"Electronics","maxPrice":5}    no_filter_matches  (top sim n/a)
+
+## Summary
+
+group                                       cases  hit@3   MRR     traps  HNSW recall@10 vs exact
+Semantic relevance (no filters)             11     0.91    0.88    1      1.000
+Combined (query + filters)                  3      1.00    1.00    1      1.000
+No-result cases: 4/4 passed
+
+Threshold calibration: lowest best-relevant similarity 0.335, highest no-result similarity 0.242 (current cut-off 0.3, strong 0.45)
+
+## Embedding text recipe (semantic group)
+
+name + description (current):         hit@3 0.91  MRR 0.88  traps 1
+name + category + description:        hit@3 0.91  MRR 0.88  traps 1

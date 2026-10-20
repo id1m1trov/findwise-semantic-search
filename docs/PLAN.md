@@ -19,14 +19,14 @@ time, never edited by hand. A search runs in three stages:
 | # | Step | Status |
 |---|------|--------|
 | 0 | Workspace skeleton, embedding + HNSW spikes | done |
-| 1 | Product dataset **and** evaluation queries with expected results, written together (before any search results exist, to avoid overfitting) | done (held-out queries pending) |
+| 1 | Product dataset **and** evaluation queries with expected results, written together (before any search results exist, to avoid overfitting) | done (incl. 3 held-out queries) |
 | 2 | SQLite layer: schema, repository, catalog sync by SKU | done |
 | 3 | Embedding module: model loaded once, one documented "embedding text" recipe | done |
 | 4 | Vector index: build/rebuild, atomic file write, fingerprint-based staleness check on startup | done |
 | 5 | Search service: filter → rank → hydrate, empty-query path, relevance cutoff, response `meta` | done |
-| 6 | Evaluation script (`npm run eval`): relevance metrics + HNSW vs exact comparison | script done; final run after held-out queries |
+| 6 | Evaluation script (`npm run eval`): relevance metrics + HNSW vs exact comparison | done: results and limitations in `docs/evaluation/` |
 | 7 | HTTP API: routes, zod validation, error handling, API tests | done |
-| 8 | Frontend: search, filters, results, explanation of the pipeline | done |
+| 8 | Frontend: search, filters, results, explanation of the pipeline | done; design and UX review next (incl. neutral relevance wording) |
 | 9 | Docker Compose (Docker not yet installed on the dev machine) | |
 | 10 | README (decisions, trade-offs, how to run, AI usage) + exported AI conversation logs | |
 
@@ -94,6 +94,9 @@ time, never edited by hand. A search runs in three stages:
   product fields are embedded.
 
 ### UI (step 8)
+- **Revisit in the design stage:** "Strong / Good match" can overstate weak results
+  (see `docs/evaluation/`). Prefer neutral wording such as "Top ranked" / "Related
+  results", with the similarity score as secondary information.
 - Show a relevance indicator per result and a one-line pipeline summary, e.g.
   "18 products match your filters · ranked by meaning · 5 relevant · 21 ms".
 - Example query chips (incl. "something to keep my drink hot on a camping trip") and a
