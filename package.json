@@ -8,10 +8,11 @@
   "scripts": {
     "dev:backend": "npm run dev -w backend",
     "dev:frontend": "npm run dev -w frontend",
-    "test": "npm run test -w backend",
+    "test": "npm run test -w backend && npm run test -w frontend",
     "ingest": "npm run ingest -w backend",
     "eval": "npm run eval -w backend",
     "spike:embeddings": "npm run spike:embeddings -w backend",
-    "spike:hnsw": "npm run spike:hnsw -w backend"
+    "spike:hnsw": "npm run spike:hnsw -w backend",
+    "build": "npm run build -w backend && npm run build -w frontend"
   }
 }

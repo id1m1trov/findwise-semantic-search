@@ -26,7 +26,7 @@ time, never edited by hand. A search runs in three stages:
 | 5 | Search service: filter → rank → hydrate, empty-query path, relevance cutoff, response `meta` | done |
 | 6 | Evaluation script (`npm run eval`): relevance metrics + HNSW vs exact comparison | script done; final run after held-out queries |
 | 7 | HTTP API: routes, zod validation, error handling, API tests | done |
-| 8 | Frontend: search, filters, results, explanation of the pipeline | |
+| 8 | Frontend: search, filters, results, explanation of the pipeline | done |
 | 9 | Docker Compose (Docker not yet installed on the dev machine) | |
 | 10 | README (decisions, trade-offs, how to run, AI usage) + exported AI conversation logs | |
 
