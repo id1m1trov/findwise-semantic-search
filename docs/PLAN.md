@@ -19,13 +19,13 @@ time, never edited by hand. A search runs in three stages:
 | # | Step | Status |
 |---|------|--------|
 | 0 | Workspace skeleton, embedding + HNSW spikes | done |
-| 1 | Product dataset **and** evaluation queries with expected results, written together (before any search results exist, to avoid overfitting) | next, dataset reviewed first |
-| 2 | SQLite layer: schema (incl. per-product `content_hash`), repository, seed script | |
-| 3 | Embedding module: model loaded once, one documented "embedding text" recipe | |
-| 4 | Vector index: build/rebuild, atomic file write, fingerprint-based staleness check on startup | |
-| 5 | Search service: filter → rank → hydrate, empty-query path, relevance cutoff, response `meta` | |
-| 6 | Evaluation script (`npm run eval`): relevance metrics + HNSW vs exact comparison | |
-| 7 | HTTP API: routes, zod validation, error handling, API tests | |
+| 1 | Product dataset **and** evaluation queries with expected results, written together (before any search results exist, to avoid overfitting) | done (held-out queries pending) |
+| 2 | SQLite layer: schema, repository, catalog sync by SKU | done |
+| 3 | Embedding module: model loaded once, one documented "embedding text" recipe | done |
+| 4 | Vector index: build/rebuild, atomic file write, fingerprint-based staleness check on startup | done |
+| 5 | Search service: filter → rank → hydrate, empty-query path, relevance cutoff, response `meta` | done |
+| 6 | Evaluation script (`npm run eval`): relevance metrics + HNSW vs exact comparison | script done; final run after held-out queries |
+| 7 | HTTP API: routes, zod validation, error handling, API tests | done |
 | 8 | Frontend: search, filters, results, explanation of the pipeline | |
 | 9 | Docker Compose (Docker not yet installed on the dev machine) | |
 | 10 | README (decisions, trade-offs, how to run, AI usage) + exported AI conversation logs | |
@@ -43,10 +43,11 @@ time, never edited by hand. A search runs in three stages:
 
 ### Keeping SQLite and the index in sync (steps 2 and 4)
 - Ingestion writes SQLite first, then rebuilds the whole index (~1 s at this size).
-- Each product stores `content_hash` = hash of the exact text that gets embedded.
+- Each product's `content_hash` = SHA-256 of the exact text that gets embedded. It is
+  computed from the SQLite row when needed rather than stored, so it can never be stale
+  and a change to the embedding-text recipe is detected automatically.
 - The index is saved with a sidecar metadata file containing a **fingerprint**: a hash of
-  the sorted `(id, content_hash)` pairs, the model name, the embedding-text recipe version
-  and the vector dimension. Index + metadata are written atomically (temp file + rename).
+  the sorted `(id, content_hash)` pairs, the model name and the vector dimension. Index + metadata are written atomically (temp file + rename).
 - On startup the fingerprint is recomputed from SQLite; rebuild if the index or metadata
   is missing/unreadable or the fingerprint differs.
 - Tests must prove the check detects: changed description, deleted product, added
@@ -55,9 +56,32 @@ time, never edited by hand. A search runs in three stages:
   come from SQLite.
 - Not built (production notes): CRUD API, incremental index updates, outbox pattern.
 
+### Dataset (step 1)
+- 72 products, 12 per category, in `backend/data/products.json`: `sku`, `name`,
+  `description`, `category`, `price` (EUR in JSON, stored as integer cents).
+- `sku` is the stable business key (used by tests and the eval file); the SQLite
+  integer `id` is internal and is the HNSW label.
+- Descriptions explain purpose and use, avoid shared marketing filler, and must **not**
+  reuse the wording of the eval queries (checked automatically). Keyword traps (shared
+  words, different meaning) and same-purpose products across categories are deliberate.
+
+### Testing is split by layer, so a failure points at its cause
+- **Filter tests (SQL only, deterministic, vitest)**: category, price range, inclusive
+  price boundaries, combined filters, filters that exclude every product, empty query +
+  category (plain filtered list). No embeddings involved.
+- **Relevance eval (`npm run eval`, no filters)**: does the semantic search rank the
+  right products first?
+- **Combined eval cases (query + filters)**: a small separate group, run only after both
+  layers pass on their own.
+- **No-result cases**, kept distinct because the UI shows different messages:
+  - filters exclude everything → "No products match these filters"
+  - filters match, but nothing is relevant → "No relevant products found"
+  - unrelated query without filters → "No relevant products found"
+
 ### Evaluation (steps 1 and 6)
-- ~12–15 hand-written queries with expected product ids: intent paraphrases, synonyms,
-  query + filter combinations, keyword-literal, and at least one no-match query.
+- ~15 hand-written queries with expected SKUs: intent paraphrases, synonyms, keyword
+  traps (with "must not be in top 3" SKUs), exact names and no-match queries; plus 3
+  held-out queries written by the developer before running the search.
 - Two separate questions, two separate metrics:
   - **Is the embedding model finding relevant products?** hit@3 and MRR against the
     hand-written expected results.

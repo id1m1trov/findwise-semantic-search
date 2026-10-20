@@ -1,0 +1,118 @@
+{
+  "semantic": [
+    {
+      "query": "something to keep my drink hot on a camping trip",
+      "relevant": ["OUT-001", "KIT-001"],
+      "mustNotInTop3": ["CLO-003", "KIT-002", "KIT-011"],
+      "note": "The brief's example. Traps: camping t-shirt, plain mug, hot sauce."
+    },
+    {
+      "query": "water bottle for the gym",
+      "relevant": ["FIT-001", "FIT-002"],
+      "mustNotInTop3": ["HOM-001"],
+      "note": "Trap: the hot water bottle shares 'water bottle'."
+    },
+    {
+      "query": "something to keep my bed warm in winter",
+      "relevant": ["HOM-001", "HOM-002", "HOM-003"],
+      "mustNotInTop3": ["FIT-001"],
+      "note": "Reverse of the previous trap."
+    },
+    {
+      "query": "light for my tent at night",
+      "relevant": ["OUT-004", "OUT-005"],
+      "mustNotInTop3": ["CLO-001", "FIT-005"],
+      "note": "Traps: 'lightweight' shoes, 'extra light' bands."
+    },
+    {
+      "query": "something soft to sleep on while camping",
+      "relevant": ["OUT-002", "OUT-003", "OUT-012"],
+      "mustNotInTop3": ["ELE-005"],
+      "note": "Trap: mouse pad shares 'pad' with sleeping pad."
+    },
+    {
+      "query": "stay cool while running in summer",
+      "relevant": ["FIT-006", "CLO-004"],
+      "mustNotInTop3": ["ELE-004", "KIT-010"],
+      "note": "Traps: laptop cooling pad, saucepans with 'stay-cool handles'."
+    },
+    {
+      "query": "charge my phone without a power outlet",
+      "relevant": ["ELE-003", "OUT-006"],
+      "mustNotInTop3": ["ELE-009"],
+      "note": "Negation test: the wall charger needs an outlet. Embedding models handle 'without' poorly."
+    },
+    {
+      "query": "block out noise on a long flight",
+      "relevant": ["ELE-001"],
+      "mustNotInTop3": ["HOM-005"],
+      "note": "Trap: blackout curtains 'block out' light and dull traffic noise."
+    },
+    {
+      "query": "gift for a coffee lover",
+      "relevant": ["KIT-004", "KIT-005", "KIT-003", "KIT-008", "KIT-001"],
+      "mustNotInTop3": [],
+      "note": "Several right answers."
+    },
+    {
+      "query": "yoga mat",
+      "relevant": ["FIT-003"],
+      "mustNotInTop3": [],
+      "note": "Exact product name must still rank first."
+    },
+    {
+      "query": "sneakers",
+      "relevant": ["CLO-001", "CLO-002"],
+      "mustNotInTop3": [],
+      "note": "Synonym that never appears in the catalog (shoes are called 'trainers')."
+    }
+  ],
+  "combined": [
+    {
+      "query": "keep my drink hot",
+      "filters": { "category": "Kitchen & Drinkware" },
+      "relevant": ["KIT-001"],
+      "mustNotInTop3": ["KIT-011"],
+      "note": "The filter removes the best overall match (the thermos)."
+    },
+    {
+      "query": "keep drinks cold during workouts",
+      "filters": { "category": "Fitness" },
+      "relevant": ["FIT-001"],
+      "mustNotInTop3": [],
+      "note": "Category filter."
+    },
+    {
+      "query": "warm jacket for winter",
+      "filters": { "maxPrice": 60 },
+      "relevant": ["CLO-006"],
+      "mustNotInTop3": [],
+      "note": "Price filter excludes the 189 EUR parka and the 69 EUR base layer."
+    }
+  ],
+  "noResults": [
+    {
+      "query": "spaceship engine parts",
+      "expectedOutcome": "no_relevant_matches",
+      "note": "Unrelated query, no filters."
+    },
+    {
+      "query": "replacement car tyres",
+      "expectedOutcome": "no_relevant_matches",
+      "note": "Unrelated query, no filters."
+    },
+    {
+      "query": "spaceship engine parts",
+      "filters": { "category": "Kitchen & Drinkware" },
+      "expectedOutcome": "no_relevant_matches",
+      "note": "Filters match products, but none are relevant."
+    },
+    {
+      "query": "noise-cancelling headphones",
+      "filters": { "category": "Electronics", "maxPrice": 5 },
+      "expectedOutcome": "no_filter_matches",
+      "note": "Filters exclude every product."
+    }
+  ],
+  "heldOut": []
+}

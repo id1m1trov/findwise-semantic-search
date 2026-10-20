@@ -1,0 +1,506 @@
+[
+  {
+    "sku": "OUT-001",
+    "name": "Vacuum Insulated Thermos 750 ml",
+    "description": "Double-walled stainless steel flask that holds coffee, tea or soup close to boiling for up to 12 hours. The screw-on lid doubles as a cup, and a push-button stopper pours without unscrewing anything. Sized for a day at the campsite, a frosty trailhead or a long drive into the mountains.",
+    "category": "Camping & Outdoors",
+    "price": 34.99
+  },
+  {
+    "sku": "OUT-002",
+    "name": "Self-Inflating Sleeping Pad",
+    "description": "Open the valve and the foam core expands on its own into a 5 cm cushion between you and cold, uneven ground. An R-value of 3.5 makes it usable from spring to early autumn, and it rolls down to the size of a loaf of bread for the backpack.",
+    "category": "Camping & Outdoors",
+    "price": 59.0
+  },
+  {
+    "sku": "OUT-003",
+    "name": "Three-Season Down Sleeping Bag",
+    "description": "Mummy-shaped bag filled with 600-fill duck down, comfortable to about 2 °C. A draft collar and hood trap body heat on chilly nights under canvas, and it compresses into a stuff sack smaller than a football. Best suited to trips between April and October.",
+    "category": "Camping & Outdoors",
+    "price": 129.0
+  },
+  {
+    "sku": "OUT-004",
+    "name": "Rechargeable LED Headlamp",
+    "description": "Hands-free 400-lumen beam with a red mode that preserves your night vision. Charges over USB-C and runs about 8 hours on medium. Handy for pitching up after sunset, pre-dawn trail starts or rummaging through a pack without holding a torch in your teeth.",
+    "category": "Camping & Outdoors",
+    "price": 27.5
+  },
+  {
+    "sku": "OUT-005",
+    "name": "Collapsible LED Lantern",
+    "description": "Pulls up from a flat disc into a lantern that spreads warm, glare-free illumination across a whole tent interior or picnic table. Three brightness levels, a hanging hook and enough battery for two evenings on low. Folds back down to 4 cm thick.",
+    "category": "Camping & Outdoors",
+    "price": 22.0
+  },
+  {
+    "sku": "OUT-006",
+    "name": "Foldable Solar Charger 21 W",
+    "description": "Four weatherproof panels unfold to catch sunlight and feed two USB ports, enough to top up a smartphone in roughly three hours of direct sun. Clips onto a backpack while you walk. It has no internal battery, so it pairs best with a battery pack for cloudy days.",
+    "category": "Camping & Outdoors",
+    "price": 64.0
+  },
+  {
+    "sku": "OUT-007",
+    "name": "Two-Person Dome Tent",
+    "description": "Freestanding shelter with two doors and two vestibules, so nobody climbs over anyone at 3 a.m. Colour-coded poles make pitching a ten-minute job, and the 3000 mm flysheet handles steady rain. Packed weight is 2.3 kg.",
+    "category": "Camping & Outdoors",
+    "price": 149.0
+  },
+  {
+    "sku": "OUT-008",
+    "name": "Compact Gas Camping Stove",
+    "description": "Screws onto a standard butane-propane canister and boils a litre of water in about four minutes. Folding pot supports and a push-button igniter, and the whole burner nests inside most cook pots for transport.",
+    "category": "Camping & Outdoors",
+    "price": 39.9
+  },
+  {
+    "sku": "OUT-009",
+    "name": "Emergency Rain Poncho (3-Pack)",
+    "description": "Hooded polyethylene ponchos that fold into pocket-sized pouches. Throw one over yourself and your daypack when a summer shower catches you on the trail or at an open-air concert. Reusable a few times, but not built for all-day storms.",
+    "category": "Camping & Outdoors",
+    "price": 12.99
+  },
+  {
+    "sku": "OUT-010",
+    "name": "Water Filter Straw",
+    "description": "Sip directly from streams and lakes through a hollow-fibre membrane that removes 99.9% of bacteria and parasites. Rated for 4000 litres, weighs 45 g and needs no batteries or chemicals. Small insurance for multi-day walks far from any tap.",
+    "category": "Camping & Outdoors",
+    "price": 24.95
+  },
+  {
+    "sku": "OUT-011",
+    "name": "Aluminium Trekking Poles (Pair)",
+    "description": "Flick-lock poles that adjust from 100 to 135 cm, with cork grips that stay comfortable in sweaty hands. They take strain off the knees on steep descents and steady you on river crossings. Rubber tips included for pavement.",
+    "category": "Camping & Outdoors",
+    "price": 44.0
+  },
+  {
+    "sku": "OUT-012",
+    "name": "Parachute Nylon Hammock",
+    "description": "Ripstop hammock with tree-friendly straps that goes up between two trunks in under two minutes and holds up to 180 kg. Great for an afternoon nap by a lake, or as a raised bed where the ground is too rocky to lie on.",
+    "category": "Camping & Outdoors",
+    "price": 35.0
+  },
+  {
+    "sku": "KIT-001",
+    "name": "Insulated Travel Mug 450 ml",
+    "description": "Leak-proof commuter mug with a one-hand flip lid that fits car cup holders. Vacuum walls hold coffee at sipping temperature for around 6 hours, or iced drinks chilled for 12. The lid comes fully apart for the dishwasher.",
+    "category": "Kitchen & Drinkware",
+    "price": 24.99
+  },
+  {
+    "sku": "KIT-002",
+    "name": "Stoneware Coffee Mug 350 ml",
+    "description": "Glazed stoneware mug with a wide handle and a speckled sand finish. Microwave and dishwasher safe. No insulation and no lid: it is made for slow mornings at the kitchen table, not for taking anywhere.",
+    "category": "Kitchen & Drinkware",
+    "price": 9.5
+  },
+  {
+    "sku": "KIT-003",
+    "name": "Cold Brew Coffee Maker 1 L",
+    "description": "Glass carafe with a fine stainless mesh filter. Add coarse grounds and water, leave it in the fridge overnight, and you have smooth, low-acid concentrate for a week of iced coffees. Pours cleanly through an airtight lid.",
+    "category": "Kitchen & Drinkware",
+    "price": 29.0
+  },
+  {
+    "sku": "KIT-004",
+    "name": "Conical Burr Coffee Grinder",
+    "description": "Steel burrs with 30 settings, from powder-fine for espresso to coarse for French press. Grinding beans just before brewing makes a noticeable difference to aroma. Quiet motor, removable catch cup and a timer for consistent doses.",
+    "category": "Kitchen & Drinkware",
+    "price": 79.0
+  },
+  {
+    "sku": "KIT-005",
+    "name": "Pour-Over Coffee Set",
+    "description": "Ceramic dripper, a 600 ml glass server and 100 paper filters in one box. Brewing by hand gives full control over flow and extraction, bringing out fruity notes in light-roast beans. A thoughtful present for someone getting into specialty coffee.",
+    "category": "Kitchen & Drinkware",
+    "price": 42.0
+  },
+  {
+    "sku": "KIT-006",
+    "name": "Cast Iron Skillet 26 cm",
+    "description": "Pre-seasoned cast iron pan that goes from hob to oven to campfire. It holds heat evenly for a hard sear on steak or crisp-edged cornbread, and gets more non-stick the more you cook with it. Hand wash and oil lightly after use.",
+    "category": "Kitchen & Drinkware",
+    "price": 38.0
+  },
+  {
+    "sku": "KIT-007",
+    "name": "Glass Water Bottle with Silicone Sleeve 600 ml",
+    "description": "Borosilicate glass bottle wrapped in a silicone sleeve that cushions knocks and improves grip. Glass does not hold onto flavours, so it suits fruit-infused water and herbal tea. Made for the desk and the daily commute rather than rough outdoor use.",
+    "category": "Kitchen & Drinkware",
+    "price": 18.0
+  },
+  {
+    "sku": "KIT-008",
+    "name": "Electric Gooseneck Kettle",
+    "description": "Variable-temperature kettle that holds water anywhere from 40 to 100 °C, with a narrow spout for slow, precise pouring. Ideal for green tea that turns bitter at boiling point and for hand-brewed coffee. 0.9 L capacity, 1200 W.",
+    "category": "Kitchen & Drinkware",
+    "price": 69.0
+  },
+  {
+    "sku": "KIT-009",
+    "name": "Stacking Bento Lunch Box",
+    "description": "Two stacking compartments with a divider and a matching fork, held together by an elastic strap. The lower tier is microwave safe for reheating leftovers at work, and it seals well enough for sauces when kept upright.",
+    "category": "Kitchen & Drinkware",
+    "price": 21.5
+  },
+  {
+    "sku": "KIT-010",
+    "name": "Non-Stick Saucepan Set (3 Pieces)",
+    "description": "16, 18 and 20 cm saucepans with glass lids and stay-cool handles, suitable for every hob including induction. A ceramic-based coating lets eggs and porridge slide out with very little oil.",
+    "category": "Kitchen & Drinkware",
+    "price": 54.0
+  },
+  {
+    "sku": "KIT-011",
+    "name": "Hot Sauce Tasting Set",
+    "description": "Six small bottles of chilli sauce ranging from mild smoked chipotle to fiery habanero, with tasting notes and pairing ideas for tacos, eggs and grilled meat. A fun box to pass around at a barbecue.",
+    "category": "Kitchen & Drinkware",
+    "price": 26.0
+  },
+  {
+    "sku": "KIT-012",
+    "name": "Forged Chef's Knife 20 cm",
+    "description": "German steel blade with a full tang and a comfortable polymer handle. Balanced for rocking cuts through herbs and onions, and heavy enough to split a squash. Arrives sharp and holds its edge with regular honing.",
+    "category": "Kitchen & Drinkware",
+    "price": 49.0
+  },
+  {
+    "sku": "ELE-001",
+    "name": "Wireless Noise-Cancelling Headphones",
+    "description": "Over-ear headphones with adaptive active noise cancellation that tunes out engine drone, office chatter and train rumble. 30-hour battery, folds flat into a hard case, and a transparency mode lets announcements through when you need them.",
+    "category": "Electronics",
+    "price": 179.0
+  },
+  {
+    "sku": "ELE-002",
+    "name": "True Wireless Earbuds",
+    "description": "Compact in-ear buds with a case that adds three extra charges. Sweat- and splash-resistant (IPX5), with touch controls and clear microphones for calls. Basic passive isolation only, no active noise cancelling.",
+    "category": "Electronics",
+    "price": 59.0
+  },
+  {
+    "sku": "ELE-003",
+    "name": "Power Bank 20,000 mAh",
+    "description": "Pocketable battery pack with USB-C fast charging that refills a typical smartphone four to five times. Two devices can draw power at once, and a small display shows how much is left. Approved for carry-on luggage.",
+    "category": "Electronics",
+    "price": 39.99
+  },
+  {
+    "sku": "ELE-004",
+    "name": "Laptop Cooling Pad",
+    "description": "Raised mesh stand with two quiet fans that pull hot air away from the underside of laptops up to 17 inches. Reduces thermal throttling during gaming or video exports, and the tilt improves typing posture.",
+    "category": "Electronics",
+    "price": 29.0
+  },
+  {
+    "sku": "ELE-005",
+    "name": "Extended Gaming Mouse Pad",
+    "description": "90 × 40 cm desk mat with a smooth micro-woven surface for precise tracking and a non-slip rubber base. Stitched edges prevent fraying, and it is big enough for the keyboard and mouse together.",
+    "category": "Electronics",
+    "price": 19.9
+  },
+  {
+    "sku": "ELE-006",
+    "name": "Smartwatch with Sleep Tracking",
+    "description": "Slim fitness watch that records sleep stages, heart rate and blood oxygen overnight and gives a morning readiness score. Built-in GPS for runs and rides, a 7-day battery and water resistance to 50 m.",
+    "category": "Electronics",
+    "price": 149.0
+  },
+  {
+    "sku": "ELE-007",
+    "name": "Waterproof Bluetooth Speaker",
+    "description": "Palm-sized IP67 speaker that floats, shrugs off sand and plays for 12 hours. Surprisingly full bass for its size, and two can be paired for stereo. A lanyard loop lets it hang from a branch or a shower rail.",
+    "category": "Electronics",
+    "price": 49.0
+  },
+  {
+    "sku": "ELE-008",
+    "name": "E-Reader with Warm Light",
+    "description": "Six-inch glare-free screen that reads like paper even in direct sun, with an adjustable warm front light for reading before bed. Stores thousands of books, and one charge lasts several weeks.",
+    "category": "Electronics",
+    "price": 129.0
+  },
+  {
+    "sku": "ELE-009",
+    "name": "65 W USB-C Wall Charger (4 Ports)",
+    "description": "Compact GaN charger that powers a laptop, a tablet and two phones from a single mains socket. Folding prongs for travel, and smart power sharing that gives each port what it needs.",
+    "category": "Electronics",
+    "price": 34.0
+  },
+  {
+    "sku": "ELE-010",
+    "name": "Full HD Webcam",
+    "description": "1080p camera with automatic light correction and dual microphones for video calls. Clips onto any monitor or sits on a tripod, and a sliding privacy shutter covers the lens when it is not in use.",
+    "category": "Electronics",
+    "price": 45.0
+  },
+  {
+    "sku": "ELE-011",
+    "name": "Tenkeyless Mechanical Keyboard",
+    "description": "Compact keyboard with tactile brown switches, white backlighting and a detachable USB-C cable. Satisfying feedback for long writing sessions without the loud click of blue switches.",
+    "category": "Electronics",
+    "price": 89.0
+  },
+  {
+    "sku": "ELE-012",
+    "name": "Wi-Fi Smart Plug (2-Pack)",
+    "description": "Plugs that switch lamps, fans or heaters on a schedule or from an app, with energy monitoring to spot power-hungry devices. Works with common voice assistants and needs no separate hub.",
+    "category": "Electronics",
+    "price": 24.0
+  },
+  {
+    "sku": "CLO-001",
+    "name": "Lightweight Road Running Shoes",
+    "description": "Breathable mesh trainers with a responsive foam midsole, weighing just 220 g per shoe. Built for road runs from 5K up to a half marathon, with reflective details for early mornings.",
+    "category": "Clothing",
+    "price": 89.0
+  },
+  {
+    "sku": "CLO-002",
+    "name": "Trail Running Shoes",
+    "description": "Aggressive rubber lugs grip mud, wet rock and loose gravel, while a rock plate protects the sole of your foot from sharp stones. Water-draining uppers dry quickly after stream crossings.",
+    "category": "Clothing",
+    "price": 109.0
+  },
+  {
+    "sku": "CLO-003",
+    "name": "Happy Camper Graphic T-Shirt",
+    "description": "Soft cotton tee printed with a vintage-style mountain, campfire and tent illustration and the words 'Happy Camper'. Relaxed fit, pre-shrunk, and a fun pick for festival weekends.",
+    "category": "Clothing",
+    "price": 19.0
+  },
+  {
+    "sku": "CLO-004",
+    "name": "Breathable Mesh Running Top",
+    "description": "Featherweight polyester top with mesh panels under the arms and across the back that move sweat off the skin and dry within minutes. Flatlock seams prevent chafing on longer runs when the temperature climbs.",
+    "category": "Clothing",
+    "price": 29.0
+  },
+  {
+    "sku": "CLO-005",
+    "name": "Three-Layer Waterproof Rain Jacket",
+    "description": "Shell with taped seams and a 20,000 mm waterproof rating that sheds heavy downpours. Pit zips vent heat on climbs, and the hood adjusts to turn with your head. Packs into its own chest pocket.",
+    "category": "Clothing",
+    "price": 119.0
+  },
+  {
+    "sku": "CLO-006",
+    "name": "Recycled Fleece Jacket",
+    "description": "Midweight fleece made from recycled plastic that traps body heat without bulk. A cosy outer layer for cool autumn days, or an insulating mid-layer under a shell once temperatures drop below freezing. Two zipped hand pockets.",
+    "category": "Clothing",
+    "price": 54.0
+  },
+  {
+    "sku": "CLO-007",
+    "name": "Hooded Down Parka",
+    "description": "Knee-length parka insulated with 700-fill goose down under a windproof outer fabric, built for sub-zero city commutes and snowy weekends. Fleece-lined pockets, a removable faux-fur trim and a two-way zip.",
+    "category": "Clothing",
+    "price": 189.0
+  },
+  {
+    "sku": "CLO-008",
+    "name": "Merino Wool Base Layer Top",
+    "description": "Thin long-sleeve top in fine merino that regulates temperature and resists odour over several days of wear. A first layer for ski days, cold-weather hikes or cycling to work in January.",
+    "category": "Clothing",
+    "price": 69.0
+  },
+  {
+    "sku": "CLO-009",
+    "name": "Thermal Ski Gloves",
+    "description": "Insulated, waterproof gloves with a breathable membrane and touchscreen-friendly fingertips. Long gauntlet cuffs seal out snow, and wrist leashes stop them blowing away on the chairlift.",
+    "category": "Clothing",
+    "price": 39.0
+  },
+  {
+    "sku": "CLO-010",
+    "name": "Straight-Leg Stretch Jeans",
+    "description": "Mid-rise jeans in 12 oz stretch denim with a classic five-pocket cut. A dependable everyday pair that softens with every wash and keeps its shape through the day.",
+    "category": "Clothing",
+    "price": 65.0
+  },
+  {
+    "sku": "CLO-011",
+    "name": "Wide-Brim Sun Hat",
+    "description": "Packable hat with a 10 cm brim and UPF 50+ fabric that shades face, ears and neck. An adjustable chin cord keeps it on in the wind, and an inner sweatband helps on long, bright days outdoors.",
+    "category": "Clothing",
+    "price": 27.0
+  },
+  {
+    "sku": "CLO-012",
+    "name": "Merino Hiking Socks (3 Pairs)",
+    "description": "Cushioned merino-blend socks with reinforced heels and toes that cut down on blisters during long days in boots. Naturally moisture-wicking and comfortable from spring through winter.",
+    "category": "Clothing",
+    "price": 24.0
+  },
+  {
+    "sku": "HOM-001",
+    "name": "Rubber Hot Water Bottle with Knitted Cover",
+    "description": "Classic 2-litre natural rubber bottle: fill it from the kettle and tuck it under the duvet half an hour before you turn in, or hold it against sore muscles and cramps. The chunky knitted cover protects skin from direct heat.",
+    "category": "Home",
+    "price": 16.5
+  },
+  {
+    "sku": "HOM-002",
+    "name": "Merino Wool Throw Blanket",
+    "description": "Generous 130 × 170 cm throw woven from merino wool that adds a cosy layer on cold evenings, whether over your knees on the sofa or spread on top of the duvet. Breathable, so it never feels clammy.",
+    "category": "Home",
+    "price": 89.0
+  },
+  {
+    "sku": "HOM-003",
+    "name": "Electric Underblanket (Double)",
+    "description": "Fits beneath the fitted sheet and preheats the mattress in about 15 minutes, with dual controls so each side can choose its own heat setting. Switches itself off automatically after 9 hours.",
+    "category": "Home",
+    "price": 69.0
+  },
+  {
+    "sku": "HOM-004",
+    "name": "LED Desk Lamp with USB Port",
+    "description": "Adjustable-arm lamp with five colour temperatures from warm white to daylight, plus a USB port for topping up a phone. Flicker-free output reduces eye strain during long evenings of study or work.",
+    "category": "Home",
+    "price": 42.0
+  },
+  {
+    "sku": "HOM-005",
+    "name": "Thermal Blackout Curtains (2 Panels)",
+    "description": "Thermal-lined curtains that block out nearly all daylight and street lighting, helping shift workers and light sleepers rest. The dense weave also cuts draughts and dulls traffic noise from outside.",
+    "category": "Home",
+    "price": 45.0
+  },
+  {
+    "sku": "HOM-006",
+    "name": "Contoured Memory Foam Pillow",
+    "description": "Ergonomic pillow that supports the neck for side and back sleepers. The removable bamboo cover washes at 40 °C. Medium-firm, and the foam relaxes into its full shape a few hours after unpacking.",
+    "category": "Home",
+    "price": 39.0
+  },
+  {
+    "sku": "HOM-007",
+    "name": "Ultrasonic Aroma Diffuser",
+    "description": "Turns water and a few drops of essential oil into a fine scented mist for up to 8 hours, with an optional soft colour glow. Shuts off automatically when the tank runs dry.",
+    "category": "Home",
+    "price": 32.0
+  },
+  {
+    "sku": "HOM-008",
+    "name": "Lidar Robot Vacuum Cleaner",
+    "description": "Slim robot that maps every room with lidar, cleans on a schedule and returns to its dock to recharge. Strong suction lifts pet hair from rugs, and an app lets you mark no-go zones around cables.",
+    "category": "Home",
+    "price": 229.0
+  },
+  {
+    "sku": "HOM-009",
+    "name": "Three-Tier Bamboo Bathroom Shelf",
+    "description": "Freestanding shelf in water-resistant bamboo that fits beside a sink or over a toilet. Holds towels, toiletries and small plants, and assembles without tools.",
+    "category": "Home",
+    "price": 28.0
+  },
+  {
+    "sku": "HOM-010",
+    "name": "Quiet Pedestal Fan",
+    "description": "40 cm fan with adjustable height, oscillation and a night mode that gradually lowers its speed. Comes with a remote and a 7-hour timer for sticky July nights.",
+    "category": "Home",
+    "price": 59.0
+  },
+  {
+    "sku": "HOM-011",
+    "name": "Cedarwood Soy Candle",
+    "description": "Hand-poured soy wax candle with notes of cedarwood and smoked vanilla in a reusable amber glass jar. Cotton wick and around 45 hours of burn time.",
+    "category": "Home",
+    "price": 18.0
+  },
+  {
+    "sku": "HOM-012",
+    "name": "Silent Oak Wall Clock",
+    "description": "Minimalist 30 cm clock with a sweep movement that makes no ticking sound at night. Oak frame and a matte white face that suits Scandinavian-style interiors.",
+    "category": "Home",
+    "price": 35.0
+  },
+  {
+    "sku": "FIT-001",
+    "name": "Insulated Sports Bottle 750 ml",
+    "description": "Double-wall steel bottle with a straw lid and carry loop. Ice survives for around 24 hours inside, so water stays refreshing through the longest training session. Fits most bike cages and treadmill holders.",
+    "category": "Fitness",
+    "price": 27.0
+  },
+  {
+    "sku": "FIT-002",
+    "name": "Protein Shaker Bottle 700 ml",
+    "description": "Leak-proof shaker with a wire whisk ball that breaks up protein powder clumps in seconds. A twist-off compartment underneath carries a scoop of powder or supplements for after training.",
+    "category": "Fitness",
+    "price": 12.0
+  },
+  {
+    "sku": "FIT-003",
+    "name": "Non-Slip Yoga Mat 6 mm",
+    "description": "Yoga mat made from dense TPE foam with a textured surface on both sides, so it stays put in downward dog even when your palms get damp. Printed alignment lines help with positioning, and a carry strap is included.",
+    "category": "Fitness",
+    "price": 34.0
+  },
+  {
+    "sku": "FIT-004",
+    "name": "Adjustable Dumbbells (Pair)",
+    "description": "Turn the dial to change each dumbbell from 2.5 to 24 kg, replacing a rack of fifteen weights. Compact enough for an apartment corner and quick to switch between exercises.",
+    "category": "Fitness",
+    "price": 199.0
+  },
+  {
+    "sku": "FIT-005",
+    "name": "Resistance Bands Set",
+    "description": "Five latex bands from extra light to extra heavy, plus a door anchor, handles and ankle straps. Covers strength training, physio exercises and warm-ups at home or in a hotel room.",
+    "category": "Fitness",
+    "price": 22.0
+  },
+  {
+    "sku": "FIT-006",
+    "name": "Evaporative Cooling Towel",
+    "description": "Wet it, wring it and snap it: the fabric drops several degrees below body temperature for up to two hours. Drape it around your neck for jogging in the heat, tennis matches or outdoor training in July.",
+    "category": "Fitness",
+    "price": 11.0
+  },
+  {
+    "sku": "FIT-007",
+    "name": "Ridged Foam Roller",
+    "description": "High-density 45 cm roller with a ridged surface that works into tight calves, quads and back muscles. Use it before training to loosen up, or afterwards to ease next-day stiffness.",
+    "category": "Fitness",
+    "price": 24.0
+  },
+  {
+    "sku": "FIT-008",
+    "name": "Ball-Bearing Jump Rope",
+    "description": "Speed rope with smooth ball-bearing handles and an adjustable PVC-coated steel cable. Ten minutes of skipping is a serious cardio session that fits in any backyard or hotel room.",
+    "category": "Fitness",
+    "price": 14.0
+  },
+  {
+    "sku": "FIT-009",
+    "name": "Gym Duffel Bag 35 L",
+    "description": "Sturdy holdall with a ventilated shoe compartment, a waterproof pocket for damp towels and a padded shoulder strap. Fits under most locker-room benches.",
+    "category": "Fitness",
+    "price": 45.0
+  },
+  {
+    "sku": "FIT-010",
+    "name": "Doorway Pull-Up Bar",
+    "description": "Fits door frames 62 to 100 cm wide without screws, using leverage to stay secure. Multiple grip positions for pull-ups, chin-ups and hanging leg raises, and it also works on the floor for push-ups and dips.",
+    "category": "Fitness",
+    "price": 32.0
+  },
+  {
+    "sku": "FIT-011",
+    "name": "Cast Iron Kettlebell 12 kg",
+    "description": "Kettlebell with a wide, smooth handle for two-handed swings, goblet squats and Turkish get-ups. The flat base stands steady, and a vinyl coating protects floors.",
+    "category": "Fitness",
+    "price": 39.0
+  },
+  {
+    "sku": "FIT-012",
+    "name": "Heart Rate Chest Strap",
+    "description": "Chest-worn sensor that reads heart rate with ECG-level accuracy and streams it to watches, bike computers and apps over Bluetooth and ANT+. Useful for training in precise heart-rate zones.",
+    "category": "Fitness",
+    "price": 59.0
+  }
+]

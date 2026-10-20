@@ -30,6 +30,20 @@ npm run dev:frontend   # http://localhost:5173
 ```
 
 The first run downloads the embedding model (`Xenova/all-MiniLM-L6-v2`, ~23 MB) and caches it.
+On first start the backend seeds SQLite from `backend/data/products.json` and builds the
+vector index in `backend/data/generated/` (both rebuildable, never committed).
+
+```bash
+npm run ingest   # re-import products.json into SQLite; rebuilds the index only if something changed
+npm test         # backend tests (SQL filters, vector index, staleness checks, search, API, real model)
+npm run eval     # relevance evaluation: hit@3, MRR, keyword traps, HNSW vs exact search
+```
+
+Example request:
+
+```bash
+curl "http://localhost:3001/api/search?q=keep+my+drink+hot&category=Kitchen+%26+Drinkware&maxPrice=40&limit=5"
+```
 
 ### Spikes
 
