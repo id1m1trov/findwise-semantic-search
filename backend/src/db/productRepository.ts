@@ -47,6 +47,14 @@ const toProduct = (row: ProductRow): Product => ({
 export class ProductRepository {
   constructor(private readonly db: Db) {}
 
+  /**
+   * A number SQLite changes whenever *another* connection commits (e.g. `npm run ingest` while
+   * the server runs). Cheap to read, so it can be checked before every search.
+   */
+  dataVersion(): number {
+    return this.db.pragma("data_version", { simple: true }) as number;
+  }
+
   count(): number {
     return (this.db.prepare("SELECT COUNT(*) AS n FROM products").get() as { n: number }).n;
   }

@@ -1,6 +1,9 @@
 {
   "name": "findwise-semantic-search",
   "private": true,
+  "engines": {
+    "node": ">=22.12"
+  },
   "workspaces": [
     "backend",
     "frontend"

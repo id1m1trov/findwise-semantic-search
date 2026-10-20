@@ -4,13 +4,14 @@
 //   2. Does HNSW return the true nearest neighbours?            (recall@10 vs exact brute force)
 // Works on an in-memory copy of the catalog, so it never touches the app's database.
 import { readFileSync } from "node:fs";
-import { loadCatalog, toCents } from "../src/catalog/catalog.js";
+import { loadCatalog, maxPriceToCents, minPriceToCents } from "../src/catalog/catalog.js";
 import { config } from "../src/config.js";
 import { openDatabase } from "../src/db/database.js";
 import { type Product, type ProductFilters, ProductRepository } from "../src/db/productRepository.js";
 import { TransformersEmbedder } from "../src/embeddings/embedder.js";
 import { embeddingText } from "../src/embeddings/embeddingText.js";
 import { SearchService } from "../src/search/searchService.js";
+import { fixedIndex } from "../src/vector/syncedIndex.js";
 import { VectorIndex } from "../src/vector/vectorIndex.js";
 
 interface EvalFilters {
@@ -49,8 +50,8 @@ const embedder = new TransformersEmbedder(config.embeddingModel, config.embeddin
 
 const toFilters = (f: EvalFilters = {}): ProductFilters => ({
   category: f.category,
-  minPriceCents: f.minPrice === undefined ? undefined : toCents(f.minPrice),
-  maxPriceCents: f.maxPrice === undefined ? undefined : toCents(f.maxPrice),
+  minPriceCents: f.minPrice === undefined ? undefined : minPriceToCents(f.minPrice),
+  maxPriceCents: f.maxPrice === undefined ? undefined : maxPriceToCents(f.maxPrice),
 });
 const dot = (a: number[], b: number[]) => a.reduce((s, x, i) => s + x * b[i], 0);
 const pad = (s: string | number, n: number) => String(s).padEnd(n);
@@ -142,7 +143,7 @@ console.log("\n## No-result cases (threshold " + config.minSimilarity + ")\n");
 const service = new SearchService({
   repo,
   embedder,
-  index: current.index,
+  index: fixedIndex(current.index),
   minSimilarity: config.minSimilarity,
   strongSimilarity: config.strongSimilarity,
 });

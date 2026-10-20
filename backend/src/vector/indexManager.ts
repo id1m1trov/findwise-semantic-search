@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { readFileSync, renameSync, writeFileSync } from "node:fs";
 import type { Product, ProductRepository } from "../db/productRepository.js";
 import type { Embedder } from "../embeddings/embedder.js";
@@ -77,7 +77,8 @@ export async function ensureIndex(options: {
   };
   // Metadata is written last: if we crash before this, the old fingerprint no longer
   // matches and the next start simply rebuilds again.
-  writeFileSync(`${metaFile}.tmp`, JSON.stringify(meta, null, 2));
-  renameSync(`${metaFile}.tmp`, metaFile);
+  const tmp = `${metaFile}.${process.pid}.${randomUUID()}.tmp`;
+  writeFileSync(tmp, JSON.stringify(meta, null, 2));
+  renameSync(tmp, metaFile);
   return { index, rebuilt: true, reason };
 }

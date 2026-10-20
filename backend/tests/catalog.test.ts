@@ -1,7 +1,7 @@
 // Validates the catalog parser and the real dataset files.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { loadCatalog, parseCatalog, toCents } from "../src/catalog/catalog.js";
+import { loadCatalog, maxPriceToCents, minPriceToCents, parseCatalog, toCents } from "../src/catalog/catalog.js";
 import { config } from "../src/config.js";
 
 const valid = { sku: "ABC-001", name: "Mug", description: "A mug", category: "Kitchen", price: 9.5 };
@@ -10,6 +10,14 @@ describe("parseCatalog", () => {
   it("converts euros to integer cents without float noise", () => {
     expect(toCents(19.9)).toBe(1990); // 19.9 * 100 = 1989.9999999999998 in floating point
     expect(parseCatalog([valid])[0].priceCents).toBe(950);
+  });
+
+  it("rounds price filter bounds inwards so a bound is never widened", () => {
+    expect(maxPriceToCents(9.499)).toBe(949); // must exclude a 9.50 product
+    expect(minPriceToCents(9.501)).toBe(951); // must exclude a 9.50 product
+    expect(maxPriceToCents(19.9)).toBe(1990); // float noise does not lose a cent
+    expect(minPriceToCents(19.9)).toBe(1990);
+    expect(maxPriceToCents(20)).toBe(2000);
   });
 
   it("rejects duplicate SKUs, malformed SKUs and negative prices", () => {

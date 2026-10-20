@@ -5,6 +5,7 @@ import { config } from "../../src/config.js";
 import { TransformersEmbedder } from "../../src/embeddings/embedder.js";
 import { SearchService } from "../../src/search/searchService.js";
 import { buildIndex } from "../../src/vector/indexManager.js";
+import { fixedIndex } from "../../src/vector/syncedIndex.js";
 import { createFixtureRepo } from "../helpers/fixtures.js";
 
 describe("semantic search with the real model", () => {
@@ -16,7 +17,7 @@ describe("semantic search with the real model", () => {
     service = new SearchService({
       repo,
       embedder,
-      index: await buildIndex(repo.listAll(), embedder),
+      index: fixedIndex(await buildIndex(repo.listAll(), embedder)),
       minSimilarity: config.minSimilarity,
       strongSimilarity: config.strongSimilarity,
     });

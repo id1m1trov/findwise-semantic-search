@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { renameSync } from "node:fs";
 import hnswlib from "hnswlib-node";
 
@@ -58,9 +59,12 @@ export class VectorIndex {
     return neighbors.map((id, i) => ({ id, similarity: 1 - distances[i] }));
   }
 
-  /** Writes to a temp file first, then renames, so a crash never leaves a half-written index. */
+  /**
+   * Writes to a temp file first, then renames, so a crash never leaves a half-written index.
+   * The temp name is unique so the server and the ingest script can save at the same time.
+   */
   save(file: string): void {
-    const tmp = `${file}.tmp`;
+    const tmp = `${file}.${process.pid}.${randomUUID()}.tmp`;
     this.hnsw.writeIndexSync(tmp);
     renameSync(tmp, file);
   }

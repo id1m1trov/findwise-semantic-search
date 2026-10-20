@@ -9,7 +9,7 @@ in SQLite, and a React + Vite frontend.
 
 ## Prerequisites
 
-- Node.js 20+ (developed on Node 24)
+- Node.js 22.12+ (required by `better-sqlite3` and `vitest`; developed on Node 24)
 - **Windows only: Visual Studio C++ Build Tools.** `hnswlib-node` publishes no prebuilt
   Windows binary, so `npm install` compiles it from source with node-gyp. Install
   "Build Tools for Visual Studio 2022" with the **Desktop development with C++** workload
@@ -24,26 +24,48 @@ in SQLite, and a React + Vite frontend.
 ## Getting started
 
 ```bash
-npm install            # installs both workspaces (backend, frontend)
-npm run dev:backend    # http://localhost:3001/api/health
-npm run dev:frontend   # http://localhost:5173
+git clone https://github.com/id1m1trov/findwise-semantic-search.git
+cd findwise-semantic-search
+npm ci                 # installs both workspaces (backend, frontend); compiles hnswlib-node
+npm run dev:backend    # terminal 1: http://localhost:3001/api/health
+npm run dev:frontend   # terminal 2: open http://localhost:5173
 ```
 
-The first run downloads the embedding model (`Xenova/all-MiniLM-L6-v2`, ~23 MB) and caches it.
-On first start the backend seeds SQLite from `backend/data/products.json` and builds the
-vector index in `backend/data/generated/` (both rebuildable, never committed).
+Nothing else needs to exist on your machine. On the first start the backend:
+
+1. downloads the embedding model (`Xenova/all-MiniLM-L6-v2`, ~23 MB, cached under `node_modules`),
+2. seeds SQLite from `backend/data/products.json`,
+3. builds the vector index.
+
+The database and index live in `backend/data/generated/`: generated, git-ignored, and safe to
+delete (they are rebuilt on the next start).
 
 ```bash
 npm run ingest   # re-import products.json into SQLite; rebuilds the index only if something changed
-npm test         # backend tests (SQL filters, vector index, staleness checks, search, API, real model)
+npm test         # backend + frontend tests (the first run may download the model)
 npm run eval     # relevance evaluation: hit@3, MRR, keyword traps, HNSW vs exact search
+npm run build    # production build of both workspaces; then `npm start -w backend`
 ```
 
-Example request:
+`npm run ingest` also works while the backend is running: the server notices the database
+changed and refreshes its index before the next search.
+
+## Search API
+
+| Endpoint | Description |
+|---|---|
+| `GET /api/search` | `q` (free text, max 200 chars; empty = browse), `category` (exact name from `/api/categories`), `minPrice` / `maxPrice` (EUR, inclusive), `limit` (1–50, default 10) |
+| `GET /api/categories` | Category names for the filter |
+| `GET /api/health` | Status and product count |
 
 ```bash
 curl "http://localhost:3001/api/search?q=keep+my+drink+hot&category=Kitchen+%26+Drinkware&maxPrice=40&limit=5"
 ```
+
+Each result has `sku`, `name`, `description`, `category`, `price`, `similarity` (cosine
+similarity, not a percentage) and `relevance` (`strong` / `good`). `meta.outcome` is
+`results`, `no_filter_matches` (filters exclude everything) or `no_relevant_matches`
+(nothing similar enough). Invalid parameters return `400` with the field and reason.
 
 ### Spikes
 

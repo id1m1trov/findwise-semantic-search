@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { createApp } from "../src/api/app.js";
 import { SearchService } from "../src/search/searchService.js";
 import { buildIndex } from "../src/vector/indexManager.js";
+import { fixedIndex } from "../src/vector/syncedIndex.js";
 import { FakeEmbedder } from "./helpers/fakeEmbedder.js";
 import { createFixtureRepo } from "./helpers/fixtures.js";
 
@@ -12,7 +13,7 @@ const embedder = new FakeEmbedder();
 const searchService = new SearchService({
   repo,
   embedder,
-  index: await buildIndex(repo.listAll(), embedder),
+  index: fixedIndex(await buildIndex(repo.listAll(), embedder)),
   minSimilarity: 0.3,
   strongSimilarity: 0.6,
 });
@@ -38,6 +39,38 @@ describe("GET /api/search", () => {
   it("converts euro price filters to cents (inclusive)", async () => {
     const res = await request(app).get("/api/search").query({ q: "", minPrice: "20", maxPrice: "20.00" });
     expect(res.body.results.map((r: { sku: string }) => r.sku).sort()).toEqual(["KIT-001", "OUT-002"]);
+  });
+
+  it("never widens a price bound when rounding to cents", async () => {
+    const skusFor = async (query: Record<string, string>) =>
+      (await request(app).get("/api/search").query(query)).body.results.map((r: { sku: string }) => r.sku).sort();
+    expect(await skusFor({ maxPrice: "19.999" })).toEqual(["ELE-002"]); // the 20.00 products stay out
+    expect(await skusFor({ minPrice: "149.999" })).toEqual(["ELE-001"]); // 150.00 is inside
+    expect(await skusFor({ minPrice: "150.001" })).toEqual([]);
+  });
+
+  it("browses everything when the query is only whitespace and no filters are set", async () => {
+    const res = await request(app).get("/api/search").query({ q: "   " });
+    expect(res.body.meta).toMatchObject({ mode: "browse", matchingFilters: 6 });
+  });
+
+  it("treats SQL in parameters as plain text", async () => {
+    const res = await request(app).get("/api/search").query({ category: "Home'; DROP TABLE products;--" });
+    expect(res.status).toBe(400);
+    const semantic = await request(app).get("/api/search").query({ q: "x' OR 1=1--" });
+    expect(semantic.status).toBe(200);
+    expect(repo.count()).toBe(6); // table untouched
+  });
+
+  it("rejects a parameter given more than once", async () => {
+    const res = await request(app).get("/api/search?q=mug&q=lamp");
+    expect(res.status).toBe(400);
+    expect(res.body.details[0].field).toBe("q");
+  });
+
+  it("explains non-numeric prices in plain words", async () => {
+    const res = await request(app).get("/api/search").query({ maxPrice: "20,50" });
+    expect(res.body.details).toEqual([{ field: "maxPrice", message: "must be a number" }]);
   });
 
   it("treats empty form fields as not set", async () => {

@@ -1,6 +1,6 @@
 import express, { type NextFunction, type Request, type Response } from "express";
 import { z } from "zod";
-import { toCents } from "../catalog/catalog.js";
+import { maxPriceToCents, minPriceToCents } from "../catalog/catalog.js";
 import type { ProductRepository } from "../db/productRepository.js";
 import type { SearchHit, SearchService } from "../search/searchService.js";
 
@@ -11,7 +11,11 @@ export interface AppDependencies {
 
 // Query-string values arrive as strings; "" (an empty form field) means "not set".
 const emptyToUndefined = (v: unknown) => (v === "" ? undefined : v);
-const price = z.preprocess(emptyToUndefined, z.coerce.number().finite().min(0).optional());
+const price = z.preprocess(
+  emptyToUndefined,
+  z.coerce.number({ error: "must be a number" }).finite("must be a finite number").min(0, "must not be negative").optional(),
+);
+
 
 const searchQuerySchema = z
   .object({
@@ -68,8 +72,8 @@ export function createApp({ repo, searchService }: AppDependencies) {
       query: q,
       filters: {
         category,
-        minPriceCents: minPrice === undefined ? undefined : toCents(minPrice),
-        maxPriceCents: maxPrice === undefined ? undefined : toCents(maxPrice),
+        minPriceCents: minPrice === undefined ? undefined : minPriceToCents(minPrice),
+        maxPriceCents: maxPrice === undefined ? undefined : maxPriceToCents(maxPrice),
       },
       limit,
     });

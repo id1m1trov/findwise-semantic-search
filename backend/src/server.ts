@@ -6,7 +6,7 @@ import { openDatabase } from "./db/database.js";
 import { ProductRepository } from "./db/productRepository.js";
 import { TransformersEmbedder } from "./embeddings/embedder.js";
 import { SearchService } from "./search/searchService.js";
-import { ensureIndex } from "./vector/indexManager.js";
+import { SyncedIndex } from "./vector/syncedIndex.js";
 
 mkdirSync(config.generatedDir, { recursive: true });
 const repo = new ProductRepository(openDatabase(config.databaseFile));
@@ -19,11 +19,12 @@ if (repo.count() === 0) {
 }
 
 const embedder = new TransformersEmbedder(config.embeddingModel, config.embeddingDimension);
-const { index, rebuilt, reason } = await ensureIndex({
+const { index, rebuilt, reason } = await SyncedIndex.open({
   repo,
   embedder,
   indexFile: config.indexFile,
   metaFile: config.indexMetaFile,
+  log: console.log,
 });
 console.log(`[startup] vector index ${rebuilt ? "rebuilt" : "loaded"} (${index.size} vectors): ${reason}`);
 

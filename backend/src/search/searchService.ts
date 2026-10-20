@@ -1,6 +1,6 @@
 import type { Product, ProductFilters, ProductRepository } from "../db/productRepository.js";
 import type { Embedder } from "../embeddings/embedder.js";
-import type { VectorIndex } from "../vector/vectorIndex.js";
+import type { IndexSource } from "../vector/syncedIndex.js";
 
 export interface SearchParams {
   query: string; // empty string = browse the filtered products
@@ -37,7 +37,7 @@ export interface SearchResponse {
 export interface SearchServiceOptions {
   repo: ProductRepository;
   embedder: Embedder;
-  index: VectorIndex;
+  index: IndexSource; // checked on every search, so it follows database changes
   minSimilarity: number;
   strongSimilarity: number;
 }
@@ -53,7 +53,7 @@ export class SearchService {
 
   async search({ query, filters, limit }: SearchParams): Promise<SearchResponse> {
     const started = performance.now();
-    const { repo, embedder, index, minSimilarity, strongSimilarity } = this.options;
+    const { repo, embedder, minSimilarity, strongSimilarity } = this.options;
     const done = (hits: SearchHit[], meta: Omit<SearchMeta, "returned" | "minSimilarity" | "tookMs">) => ({
       hits,
       meta: { ...meta, returned: hits.length, minSimilarity, tookMs: Math.round(performance.now() - started) },
@@ -82,6 +82,7 @@ export class SearchService {
 
     // 2. rank: every candidate is ranked so we can report how many are relevant
     const [queryVector] = await embedder.embed([trimmed]);
+    const index = await this.options.index.get();
     const ranked = index.search(queryVector, candidateIds.length, new Set(candidateIds));
     const relevant = ranked.filter((hit) => hit.similarity >= minSimilarity);
 

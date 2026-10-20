@@ -52,6 +52,9 @@ time, never edited by hand. A search runs in three stages:
   is missing/unreadable or the fingerprint differs.
 - Tests must prove the check detects: changed description, deleted product, added
   product, model / recipe change; and does **not** rebuild when nothing changed.
+- While the server runs, it checks SQLite's `data_version` before each search; if another
+  process (e.g. `npm run ingest`) changed the database, it re-runs the same load-or-rebuild
+  check, so added and edited products are searchable without a restart.
 - Deleted products can never be returned even before a rebuild: filtering and hydration
   come from SQLite.
 - Not built (production notes): CRUD API, incremental index updates, outbox pattern.

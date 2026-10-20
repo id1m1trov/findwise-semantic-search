@@ -21,6 +21,14 @@ const catalogSchema = z.array(catalogProductSchema).superRefine((products, ctx) 
 /** Euros to integer cents. Rounding removes float noise such as 19.9 * 100 = 1989.9999999999998. */
 export const toCents = (euros: number): number => Math.round(euros * 100);
 
+/**
+ * Price bounds in euros to integer cents, rounding *inwards* so the bound is never widened:
+ * maxPrice 9.499 must not include a 9.50 product. The tiny epsilon absorbs float noise
+ * (19.9 * 100 = 1989.9999999999998 must still be 1990).
+ */
+export const minPriceToCents = (euros: number) => Math.ceil(euros * 100 - 1e-6);
+export const maxPriceToCents = (euros: number) => Math.floor(euros * 100 + 1e-6);
+
 /** Validates raw catalog JSON and converts it to repository products. Throws on invalid data. */
 export function parseCatalog(raw: unknown): NewProduct[] {
   return catalogSchema.parse(raw).map(({ price, ...rest }) => ({ ...rest, priceCents: toCents(price) }));

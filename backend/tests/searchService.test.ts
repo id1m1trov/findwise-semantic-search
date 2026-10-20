@@ -2,13 +2,14 @@
 import { describe, expect, it } from "vitest";
 import { SearchService } from "../src/search/searchService.js";
 import { buildIndex } from "../src/vector/indexManager.js";
+import { fixedIndex } from "../src/vector/syncedIndex.js";
 import { FakeEmbedder } from "./helpers/fakeEmbedder.js";
 import { createFixtureRepo, skus } from "./helpers/fixtures.js";
 
 async function createService(thresholds = { minSimilarity: 0.3, strongSimilarity: 0.6 }) {
   const repo = createFixtureRepo();
   const embedder = new FakeEmbedder();
-  const index = await buildIndex(repo.listAll(), embedder);
+  const index = fixedIndex(await buildIndex(repo.listAll(), embedder));
   return new SearchService({ repo, embedder, index, ...thresholds });
 }
 

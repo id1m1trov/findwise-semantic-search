@@ -1,5 +1,5 @@
 // Vector index tests with hand-made vectors: no model, fully predictable.
-import { existsSync, mkdtempSync } from "node:fs";
+import { mkdtempSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -46,9 +46,10 @@ describe("VectorIndex", () => {
   });
 
   it("saves atomically and loads back identical results", () => {
-    const file = path.join(mkdtempSync(path.join(tmpdir(), "vector-index-")), "test.hnsw");
+    const dir = mkdtempSync(path.join(tmpdir(), "vector-index-"));
+    const file = path.join(dir, "test.hnsw");
     index.save(file);
-    expect(existsSync(`${file}.tmp`)).toBe(false);
+    expect(readdirSync(dir)).toEqual(["test.hnsw"]); // no temp file left behind
     const loaded = VectorIndex.load(file, 3);
     expect(loaded.size).toBe(4);
     expect(loaded.search(query, 4)).toEqual(index.search(query, 4));
