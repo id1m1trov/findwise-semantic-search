@@ -1,116 +1,112 @@
-# findwise-semantic-search
+# Marlow & Co. – semantic product search
 
-Proof-of-concept semantic product search: a TypeScript/Express backend that combines
-vector search (hnswlib-node + local transformers.js embeddings) with structured filtering
-in SQLite, and a React + Vite frontend.
+A product search that understands what you mean, not just the words you type.
 
-> Work in progress. Design decisions, trade-offs and AI-tool usage will be documented here
-> as the project is built.
+**Live demo: <https://marlow-semantic-search.onrender.com>**
+(it runs on free hosting, so after a quiet period the first visit can take up to a minute
+while the server wakes up)
 
-## Prerequisites
+![The demo store showing results for "light for my tent at night": a lantern, a tent and a headlamp](docs/images/store.png)
 
-- Node.js 22.12+ (required by `better-sqlite3` and `vitest`; developed on Node 24)
-- **Windows only: Visual Studio C++ Build Tools.** `hnswlib-node` publishes no prebuilt
-  Windows binary, so `npm install` compiles it from source with node-gyp. Install
-  "Build Tools for Visual Studio 2022" with the **Desktop development with C++** workload
-  (MSVC v143 + a Windows SDK), e.g.:
+## The problem
 
-  ```powershell
-  winget install --id Microsoft.VisualStudio.2022.BuildTools -e --override "--passive --wait --norestart --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
-  ```
+People often describe what they *need*, not what a product is called. Someone searching for
+*"something to keep my drink hot on a camping trip"* wants a thermos. But the thermos
+description doesn't use any of those words, so a keyword search would suggest things like a
+hot water bottle or hot sauce instead.
 
-  macOS needs the Xcode command line tools; Linux needs `python3`, `make` and `g++`.
+## What I built
 
-## Getting started
+- **A search API that matches by meaning** and still respects category and price filters. For
+  the camping query it ranks the thermos second. The hot water bottle still comes first,
+  because the words "hot water" are so close to "drink hot" (see limitations below).
+- **A small demo shop**, "Marlow & Co.", with 72 products across six categories, to try the
+  search the way a shopper would.
+- **An evaluation** that measures how often the right product comes first, including queries
+  I wrote before seeing any results.
 
-```bash
-git clone https://github.com/id1m1trov/findwise-semantic-search.git
-cd findwise-semantic-search
-npm ci                 # installs both workspaces (backend, frontend); compiles hnswlib-node
-npm run dev:backend    # terminal 1: http://localhost:3001/api/health
-npm run dev:frontend   # terminal 2: open http://localhost:5173
-```
+## How the search works
 
-Nothing else needs to exist on your machine. On the first start the backend:
+1. **Filter.** The database finds the products in the chosen category and price range.
+2. **Compare meanings.** A small language model, running on the server, turns the search text
+   into a list of numbers that captures its meaning. Every product description was converted
+   the same way in advance, so finding the best matches means finding the closest numbers.
+3. **Show the closest matches.** Products that aren't close enough are left out, so an
+   unrelated search says "no close matches" instead of showing random products.
 
-1. downloads the embedding model (`Xenova/all-MiniLM-L6-v2`, ~23 MB, cached under `node_modules`),
-2. seeds SQLite from `backend/data/products.json`,
-3. builds the vector index.
+## Tech choices
 
-The database and index live in `backend/data/generated/`: generated, git-ignored, and safe to
-delete (they are rebuilt on the next start).
+| Part | Choice | Why |
+|---|---|---|
+| Backend | Node.js, Express, TypeScript | Simple, typed, one language for the whole project |
+| Products and filters | SQLite | A real database with no server to run |
+| Meaning of text | MiniLM model, run locally | Free and private: no API key, no external service |
+| Finding close matches | HNSW vector index (`hnswlib-node`) | Fast nearest-match search inside the app, no extra service |
+| Frontend | React and Vite, plain CSS | No UI library needed for a small shop |
+| Hosting | Render, one service | API and frontend together, free plan |
 
-```bash
-npm run ingest   # re-import products.json into SQLite; rebuilds the index only if something changed
-npm test         # backend + frontend tests (the first run may download the model)
-npm run eval     # relevance evaluation: hit@3, MRR, keyword traps, HNSW vs exact search
-npm run build    # production build of both workspaces; then `npm start -w backend`
-```
+## Decisions I'd point out
 
-`npm run ingest` also works while the backend is running: the server notices the database
-changed and refreshes its index before the next search.
+- **Filter first, then rank.** Ranking everything and filtering afterwards can leave an empty
+  page when a filter is strict. Ranking only the products that pass the filters avoids that.
+- **The database is the single source of truth.** The search index is rebuilt from it
+  automatically whenever products change, even while the server is running, so the two can't
+  drift apart.
+- **Measured, not tuned.** When the evaluation showed weak spots, I documented why they happen
+  instead of rewriting product descriptions until the tests passed.
+- **No "strong match" labels.** The scores turned out not to be reliable enough for that, so
+  the shop just shows results in order of relevance.
+- **A local model instead of an AI API.** It costs nothing and needs no keys, at the cost of
+  some search quality, which the evaluation makes visible.
 
-## Search API
+More on these and the trade-offs: [design decisions](docs/design-decisions.md).
 
-| Endpoint | Description |
-|---|---|
-| `GET /api/search` | `q` (free text, max 200 chars; empty = browse), `category` (exact name from `/api/categories`), `minPrice` / `maxPrice` (EUR, inclusive), `limit` (1–50, default 10) |
-| `GET /api/categories` | Category names for the filter |
-| `GET /api/health` | Status and product count |
+## Limitations
 
-```bash
-curl "http://localhost:3001/api/search?q=keep+my+drink+hot&category=Kitchen+%26+Drinkware&maxPrice=40&limit=5"
-```
+The search works well for clear needs, but the small model has weak spots:
 
-Each result has `sku`, `name`, `description`, `category`, `price`, `similarity` (cosine
-similarity, not a percentage) and `relevance` (`strong` / `good`). `meta.outcome` is
-`results`, `no_filter_matches` (filters exclude everything) or `no_relevant_matches`
-(nothing similar enough). Invalid parameters return `400` with the field and reason.
+- **Matching words can beat matching meaning.** "Hot water bottle" outranks the thermos for the
+  camping query above.
+- **It understands the topic better than the direction.** For "the sunlight keeps waking me up
+  … I need something to make my bedroom darker", a headlamp and a lantern rank above the
+  blackout curtains. And "charge my phone *without* a power outlet" still puts a wall charger in
+  the top 3.
+- **Long, chatty queries score lower** than short ones, because the important words get
+  watered down.
+- **English only.**
 
-## Demo store frontend
+The code itself isn't the cause: the evaluation shows the vector search returns exactly the
+same results as an exact search. Details and numbers: [search quality
+evaluation](docs/evaluation/README.md).
 
-The React app presents the search as a small shop, "Marlow & Co.": home page, category
-browsing, filters, product details and a cart. The cart is frontend-only (saved in
-`localStorage`, no checkout).
+## Run it yourself
 
-Product photos come from [Unsplash](https://unsplash.com/license) and
-[Pexels](https://www.pexels.com/license/). Both licenses allow free use without attribution,
-so credits are not shown in the UI; the photographer and source page of every image are
-recorded in [`frontend/src/data/productImages.ts`](frontend/src/data/productImages.ts). Each photo
-was checked against its product; four products without an honest match (water filter straw,
-electric underblanket, doorway pull-up bar, heart-rate chest strap) show a placeholder.
-Images are loaded from the Unsplash and Pexels CDNs, not stored in this repository.
-
-Browsing "all products" without a query fetches one category at a time and merges the
-results, because the search API returns at most 50 products and has no paging; a production
-API would add an `offset` parameter instead.
-
-## Evaluation and known limitations
-
-`npm run eval` measures the search implementation (HNSW vs exact search: identical in every
-case) separately from the embedding model's relevance (hit@3 0.91 / MRR 0.88 on the baseline
-queries, 0.67 / 0.75 on three held-out queries written before seeing results). Full results
-and diagnostics: [docs/evaluation](docs/evaluation/README.md).
-
-Known limitations of the current model and set-up:
-
-- Surface word overlap can beat meaning: "keep my drink hot on a camping trip" ranks a hot
-  water bottle just above the thermos.
-- Topic is understood better than direction or negation ("make my bedroom darker" finds
-  lamps; "*without* a power outlet" still finds the wall charger).
-- Long, conversational queries dilute the actual need and produce lower scores.
-- English only.
-- The 0.30 similarity cut-off reliably detects "nothing relevant", but many loosely related
-  products also pass it, so the relevance labels can overstate weak matches.
-- The server imports `products.json` only when its database is empty; later catalog edits
-  need `npm run ingest` (a running server picks them up automatically). There is
-  deliberately no HTTP ingestion endpoint, as it would be an unauthenticated write API.
-
-### Spikes
-
-Throwaway checks kept from the setup phase:
+With Node.js 22.12+:
 
 ```bash
-npm run spike:embeddings   # local embeddings + similarity ranking for a sample query
-npm run spike:hnsw         # HNSW kNN, filter callback, edge cases, save/load round trip
+npm ci
+npm run dev:backend    # terminal 1
+npm run dev:frontend   # terminal 2, then open http://localhost:5173
 ```
+
+Installing compiles one library from C++ source, so you also need a C++ compiler (on Windows,
+the Visual Studio Build Tools). See [getting started](docs/getting-started.md) for the setup,
+tests and other commands.
+
+## How it was built
+
+I built this with **Claude Code** as my main coding assistant, **JEV** for independent reviews
+of the plan and code, and **ChatGPT** for talking through ideas. The direction and key
+decisions were mine, and I reviewed and tested every step.
+[How I used AI tools](docs/ai-development.md) · [Full conversation logs](ai-logs/)
+
+## Documentation
+
+- [Getting started](docs/getting-started.md): setup, commands and tests
+- [Design decisions and trade-offs](docs/design-decisions.md)
+- [Search quality evaluation](docs/evaluation/README.md)
+- [Search API](docs/api.md)
+- [Testing](docs/testing.md)
+- [Deployment](docs/deployment.md)
+- [How AI tools were used](docs/ai-development.md)
+- [Development plan](docs/PLAN.md)

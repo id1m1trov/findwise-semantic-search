@@ -1,113 +1,128 @@
 # Development plan
 
-Built step by step; each step is reviewed and tested before the next one starts.
+I built the project step by step, and reviewed and tested each step before starting the next.
+This file is the plan I worked from, updated with how each step turned out.
 
-## Architecture in one paragraph
+## The architecture in short
 
-SQLite is the **source of truth** for products (name, description, category, price).
-The HNSW vector index is a **derived artifact**: built from SQLite, rebuildable at any
-time, never edited by hand. A search runs in three stages:
+SQLite is the **source of truth** for products (name, description, category, price). The HNSW
+vector index is built from SQLite and can be rebuilt at any time; nothing edits it directly.
+A search has three stages:
 
-1. **Filter (SQLite)**: category / price filters produce the set of allowed product ids.
-2. **Rank (HNSW)**: the query is embedded locally (MiniLM, 384 dims) and HNSW finds the
-   nearest product vectors, restricted to the allowed ids via a filter callback.
-3. **Hydrate (SQLite)**: full product rows are loaded for the ranked ids; results below
-   the relevance cutoff are dropped.
+1. **Filter (SQLite):** the category and price filters give the list of allowed product ids.
+2. **Rank (HNSW):** the search text is turned into a vector locally (MiniLM, 384 numbers), and
+   HNSW finds the closest product vectors, looking only at the allowed ids.
+3. **Load (SQLite):** the full product rows are loaded in ranked order, and results below the
+   minimum similarity are dropped.
 
 ## Steps
 
 | # | Step | Status |
 |---|------|--------|
-| 0 | Workspace skeleton, embedding + HNSW spikes | done |
-| 1 | Product dataset **and** evaluation queries with expected results, written together (before any search results exist, to avoid overfitting) | done (incl. 3 held-out queries) |
-| 2 | SQLite layer: schema, repository, catalog sync by SKU | done |
-| 3 | Embedding module: model loaded once, one documented "embedding text" recipe | done |
-| 4 | Vector index: build/rebuild, atomic file write, fingerprint-based staleness check on startup | done |
-| 5 | Search service: filter → rank → hydrate, empty-query path, relevance cutoff, response `meta` | done |
-| 6 | Evaluation script (`npm run eval`): relevance metrics + HNSW vs exact comparison | done: results and limitations in `docs/evaluation/` |
-| 7 | HTTP API: routes, zod validation, error handling, API tests | done |
-| 8 | Frontend: search, filters, results, explanation of the pipeline | done; design and UX review next (incl. neutral relevance wording) |
-| 9 | Docker Compose (Docker not yet installed on the dev machine) | |
-| 10 | README (decisions, trade-offs, how to run, AI usage) + exported AI conversation logs | |
+| 0 | Project skeleton, plus quick tests ("spikes") of the embedding model and HNSW | done |
+| 1 | Product dataset **and** evaluation queries with expected results, written together before any search existed, so I couldn't tune one to the other | done (incl. 3 held-out queries) |
+| 2 | SQLite layer: schema, queries, and syncing the catalog by SKU | done |
+| 3 | Embedding module: load the model once, and one fixed recipe for the text that gets embedded | done |
+| 4 | Vector index: build, save safely, and rebuild automatically on startup when it's out of date | done |
+| 5 | Search service: filter → rank → load, browsing with an empty query, the relevance cut-off, and a summary (`meta`) in each response | done |
+| 6 | Evaluation script (`npm run eval`): search-quality scores, plus HNSW compared with an exact search | done: results and limitations in `docs/evaluation/` |
+| 7 | HTTP API: routes, input validation with zod, error handling, API tests | done |
+| 8 | Frontend: search, filters, results, and a short explanation of how search works | done; redesigned as the Marlow & Co. demo store |
+| 9 | Docker Compose | skipped: optional, and Docker wasn't available to test it |
+| 10 | README (decisions, trade-offs, how to run, AI usage) and exported AI conversation logs | done |
+| 11 | Deployment on Render | done |
 
-## Decisions and requirements per area
+## Decisions per area
 
-### Filtering and HNSW accuracy (steps 4–6)
-- Filter in SQL first, then HNSW with a filter callback. Post-filtering (HNSW top-K, then
-  SQL) is rejected: a selective filter can leave an empty page even though matches exist.
-- Set `ef` (the search's candidate-list size) ≥ catalog size, so at ~100 products the
-  search is effectively exhaustive.
-- Production note for the README (not built): below a cardinality threshold, fall back to
-  brute-force exact search (the Weaviate / Qdrant approach).
-- hnswlib-node only accepts plain arrays: convert typed vectors with `Array.from()`.
+### Filtering, and making sure HNSW is accurate (steps 4–6)
+
+- Filter in SQL first, then let HNSW rank only the allowed ids (HNSW supports a filter
+  function for this). I don't rank first and filter afterwards: with a strict filter, the top
+  results might all be filtered out, leaving an empty page even though matching products exist.
+- HNSW is an *approximate* search. Its `ef` setting controls how many candidates it checks; I
+  set it to at least the number of products, so at ~100 products it checks everything and the
+  result is exact.
+- For a much larger catalog (not built): when a filter leaves only a few products, compare
+  against them directly instead of using HNSW. Vector databases such as Weaviate and Qdrant do
+  this.
+- hnswlib-node only accepts plain arrays, so vectors are converted with `Array.from()`.
 
 ### Keeping SQLite and the index in sync (steps 2 and 4)
-- Ingestion writes SQLite first, then rebuilds the whole index (~1 s at this size).
-- Each product's `content_hash` = SHA-256 of the exact text that gets embedded. It is
-  computed from the SQLite row when needed rather than stored, so it can never be stale
-  and a change to the embedding-text recipe is detected automatically.
-- The index is saved with a sidecar metadata file containing a **fingerprint**: a hash of
-  the sorted `(id, content_hash)` pairs, the model name and the vector dimension. Index + metadata are written atomically (temp file + rename).
-- On startup the fingerprint is recomputed from SQLite; rebuild if the index or metadata
-  is missing/unreadable or the fingerprint differs.
-- Tests must prove the check detects: changed description, deleted product, added
-  product, model / recipe change; and does **not** rebuild when nothing changed.
-- While the server runs, it checks SQLite's `data_version` before each search; if another
-  process (e.g. `npm run ingest`) changed the database, it re-runs the same load-or-rebuild
-  check, so added and edited products are searchable without a restart.
-- Deleted products can never be returned even before a rebuild: filtering and hydration
-  come from SQLite.
-- Not built (production notes): CRUD API, incremental index updates, outbox pattern.
+
+- Ingest writes to SQLite first, then rebuilds the whole index (about a second at this size).
+- For each product I hash the exact text that gets embedded. The hash is calculated from
+  SQLite when needed, not stored, so it can't go stale, and changing the embedding recipe is
+  noticed automatically.
+- Next to the index I save a small file with a **fingerprint**: one hash covering every
+  product's id and text hash, plus the model name and vector size. If anything changes, the
+  fingerprint changes. Both files are written to a temporary name first and then renamed, so a
+  crash can't leave a half-written file.
+- On startup the fingerprint is recalculated from SQLite. The index is rebuilt if it's
+  missing, unreadable or out of date.
+- Tests had to prove that the check notices a changed description, a deleted product, an
+  added product and a model or recipe change, and that it does **not** rebuild when nothing
+  changed.
+- While the server runs, it checks SQLite's `data_version` (a counter that changes when another
+  process writes) before each search. If `npm run ingest` changed the database, the server runs
+  the same check as at startup, so new and edited products are searchable without a restart.
+- A deleted product can never be returned, even before a rebuild, because filtering and loading
+  rows always go through SQLite.
+- Not built: an API for editing products, updating the index one product at a time, or an
+  outbox pattern.
 
 ### Dataset (step 1)
-- 72 products, 12 per category, in `backend/data/products.json`: `sku`, `name`,
-  `description`, `category`, `price` (EUR in JSON, stored as integer cents).
-- `sku` is the stable business key (used by tests and the eval file); the SQLite
-  integer `id` is internal and is the HNSW label.
-- Descriptions explain purpose and use, avoid shared marketing filler, and must **not**
-  reuse the wording of the eval queries (checked automatically). Keyword traps (shared
-  words, different meaning) and same-purpose products across categories are deliberate.
+
+- 72 products, 12 per category, in `backend/data/products.json`, each with `sku`, `name`,
+  `description`, `category` and `price` (euros in the file, stored as whole cents).
+- The `sku` is the stable product code used by tests and the evaluation. The SQLite `id` is
+  internal, and is also the label of the product's vector in HNSW.
+- Descriptions explain what a product is for, avoid generic marketing phrases, and must **not**
+  reuse the wording of the evaluation queries (a test checks this). Some products are
+  deliberate traps: they share words with a query but are the wrong thing, or serve the same
+  purpose in a different category.
 
 ### Testing is split by layer, so a failure points at its cause
-- **Filter tests (SQL only, deterministic, vitest)**: category, price range, inclusive
-  price boundaries, combined filters, filters that exclude every product, empty query +
-  category (plain filtered list). No embeddings involved.
-- **Relevance eval (`npm run eval`, no filters)**: does the semantic search rank the
-  right products first?
-- **Combined eval cases (query + filters)**: a small separate group, run only after both
-  layers pass on their own.
-- **No-result cases**, kept distinct because the UI shows different messages:
-  - filters exclude everything → "No products match these filters"
-  - filters match, but nothing is relevant → "No relevant products found"
-  - unrelated query without filters → "No relevant products found"
+
+- **Filter tests** (SQL only, no model): category, price range, prices exactly on the
+  boundary, combined filters, filters that match nothing, and an empty query with a category.
+- **Relevance evaluation** (`npm run eval`, no filters): does the search rank the right
+  products first?
+- **Search + filter cases:** a small separate group, run only once both parts pass on their
+  own.
+- **No-result cases**, kept separate because the UI shows a different message for each:
+  - the filters match nothing → "No products match these filters"
+  - the filters match, but nothing is relevant → "No relevant products found"
+  - an unrelated search without filters → "No relevant products found"
 
 ### Evaluation (steps 1 and 6)
-- ~15 hand-written queries with expected SKUs: intent paraphrases, synonyms, keyword
-  traps (with "must not be in top 3" SKUs), exact names and no-match queries; plus 3
-  held-out queries written by the developer before running the search.
-- Two separate questions, two separate metrics:
-  - **Is the embedding model finding relevant products?** hit@3 and MRR against the
-    hand-written expected results.
-  - **Is HNSW finding the true nearest neighbours?** recall@k of HNSW vs exact
-    brute-force cosine similarity over the same allowed ids.
-- Used to choose the relevance cutoff, the relevance bands shown in the UI, and which
-  product fields are embedded.
+
+- 18 hand-written queries with the products they should find (11 searches without filters, 3
+  with filters, 4 that should find nothing): reworded needs, synonyms, keyword traps (with
+  products that must *not* be in the top 3) and exact names. Plus 3 held-out queries that I
+  wrote before running any search.
+- Two separate questions, measured separately:
+  - **Does the model find the right products?** hit@3 and MRR against the expected results.
+  - **Does HNSW find the true closest vectors?** HNSW's results compared with an exact search
+    over the same allowed ids.
+- Used to choose the relevance cut-off and which product fields get embedded.
 
 ### UI (step 8)
-- **Revisit in the design stage:** "Strong / Good match" can overstate weak results
-  (see `docs/evaluation/`). Prefer neutral wording such as "Top ranked" / "Related
-  results", with the similarity score as secondary information.
-- Show a relevance indicator per result and a one-line pipeline summary, e.g.
-  "18 products match your filters · ranked by meaning · 5 relevant · 21 ms".
-- Example query chips (incl. "something to keep my drink hot on a camping trip") and a
-  short collapsible "How it works".
-- **No relevant results → say so clearly** ("No relevant products found"); never present
-  low-scoring products as matches.
-- **Scores are not percentages.** Cosine similarity is not a confidence/probability
-  (a strong MiniLM match can be ~0.5). Show bands (e.g. strong / good match) derived from
-  the evaluation, with the raw similarity as secondary detail (e.g. "similarity 0.52").
-- Empty query + filters → plain filtered list, no scores.
 
-### Stretch goals (only if time allows)
-- "Keyword search would find N results" comparison line.
-- Hybrid keyword + semantic ranking (SQLite FTS5).
+- **Planned:** "Strong / Good match" labels next to each result, with the similarity score as
+  extra detail. **Changed:** the evaluation showed these labels can overstate weak results (see
+  `docs/evaluation/`), so the store shows results in order ("Most relevant first", "Top match")
+  and shows the similarity only in the product details.
+- A short summary above the results, for example "7 products for 'light for my tent at
+  night'", with "Most relevant first · 72 searched by meaning · 5 ms" next to it.
+- Example searches (including "something to keep my drink hot on a camping trip") and a short
+  "How search works" explanation.
+- **When nothing is relevant, say so clearly** ("No relevant products found"). Never show
+  low-scoring products as matches.
+- **Scores are not percentages.** Cosine similarity isn't a confidence level; even a strong
+  MiniLM match can score around 0.5.
+- An empty search with filters shows a plain filtered list, without scores.
+
+### Stretch goals (not done)
+
+- A line showing how many results a plain keyword search would find.
+- Combining keyword search (SQLite FTS5) with semantic ranking.
