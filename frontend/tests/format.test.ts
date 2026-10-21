@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import type { SearchMeta } from '../src/api/searchApi.ts'
-import { describeSearch, formatPrice, hasActiveFilters, priceRangeError } from '../src/lib/format.ts'
+import {
+  formatPrice,
+  formatPriceRange,
+  hasActiveFilters,
+  priceRangeError,
+  resultsHeading,
+  searchDetails,
+} from '../src/lib/format.ts'
 
 const filters = (minPrice = '', maxPrice = '', category = '') => ({ category, minPrice, maxPrice })
 
@@ -8,8 +15,8 @@ const meta = (overrides: Partial<SearchMeta>): SearchMeta => ({
   mode: 'semantic',
   outcome: 'results',
   matchingFilters: 72,
-  relevantCount: 16,
-  returned: 16,
+  relevantCount: 6,
+  returned: 6,
   minSimilarity: 0.3,
   tookMs: 8,
   ...overrides,
@@ -41,18 +48,32 @@ describe('hasActiveFilters', () => {
   })
 })
 
-describe('describeSearch', () => {
-  it('summarises a semantic search', () => {
-    expect(describeSearch(meta({}), false)).toBe('72 products searched · ranked by meaning · 16 relevant · 8 ms')
+describe('formatPriceRange', () => {
+  it('describes exactly the bounds that are applied', () => {
+    expect(formatPriceRange('25', '49.99')).toBe('€25.00 – €49.99')
+    expect(formatPriceRange('', '24.99')).toBe('Up to €24.99')
+    expect(formatPriceRange('100', '')).toBe('€100.00 and up')
+    expect(formatPriceRange('', '')).toBeNull()
+  })
+})
+
+describe('resultsHeading', () => {
+  it('names the query and the number of products', () => {
+    expect(resultsHeading(meta({}), ' gift for a coffee lover ')).toBe('6 products for “gift for a coffee lover”')
   })
 
-  it('mentions when only the top results are shown', () => {
-    expect(describeSearch(meta({ relevantCount: 30, returned: 24 }), false)).toContain('showing the top 24')
+  it('says when only the top results are shown', () => {
+    expect(resultsHeading(meta({ relevantCount: 30, returned: 24 }), 'mug')).toBe('Top 24 of 30 for “mug”')
   })
 
-  it('summarises browse mode with filters', () => {
-    expect(describeSearch(meta({ mode: 'browse', matchingFilters: 1 }), true)).toBe(
-      '1 product matches your filters · sorted A–Z · describe what you need to rank them by meaning',
-    )
+  it('counts filtered products when browsing', () => {
+    expect(resultsHeading(meta({ mode: 'browse', matchingFilters: 1 }), '')).toBe('1 product')
+  })
+})
+
+describe('searchDetails', () => {
+  it('explains the order without implying confidence', () => {
+    expect(searchDetails(meta({}))).toBe('Most relevant first · 72 searched by meaning · 8 ms')
+    expect(searchDetails(meta({ mode: 'browse' }))).toBe('Sorted A–Z')
   })
 })

@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
-import { type SearchRequest, type SearchResponse, searchProducts } from '../api/searchApi.ts'
+import { browseProducts, type SearchRequest, type SearchResponse, searchProducts } from '../api/searchApi.ts'
+
+/** What the shop page shows: a semantic search when there is a query, otherwise a browse. */
+export interface ShopRequest extends SearchRequest {
+  categories: string[] // needed to browse "all categories" (see browseProducts)
+}
 
 export type SearchState =
   | { status: 'idle' }
@@ -10,12 +15,15 @@ export type SearchState =
 /** The last finished request, tagged with the request it answered. */
 type Settled = { requestId: string; data: SearchResponse } | { requestId: string; error: string }
 
+const run = ({ query, filters, categories }: ShopRequest, signal: AbortSignal) =>
+  query.trim() ? searchProducts({ query, filters }, signal) : browseProducts(filters, categories, signal)
+
 /**
- * Runs a search whenever `request` changes (null = nothing to search yet).
+ * Runs a search or browse whenever `request` changes (null = nothing to show yet).
  * A newer request aborts the older one, so a slow response can never overwrite a newer result.
  * Loading is derived, not stored: if the last answer belongs to a different request, we are loading.
  */
-export function useProductSearch(request: SearchRequest | null) {
+export function useProductSearch(request: ShopRequest | null) {
   const [settled, setSettled] = useState<Settled | null>(null)
   const [attempt, setAttempt] = useState(0) // bumping this re-runs the same request ("Try again")
   const key = request ? JSON.stringify(request) : null
@@ -24,7 +32,7 @@ export function useProductSearch(request: SearchRequest | null) {
   useEffect(() => {
     if (!key || !requestId) return
     const controller = new AbortController()
-    searchProducts(JSON.parse(key) as SearchRequest, controller.signal)
+    run(JSON.parse(key) as ShopRequest, controller.signal)
       .then((data) => setSettled({ requestId, data }))
       .catch((error: unknown) => {
         if (controller.signal.aborted) return

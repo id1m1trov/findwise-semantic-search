@@ -41,7 +41,10 @@ export interface SearchRequest {
   filters: SearchFilters
 }
 
-export const RESULT_LIMIT = 24
+// Both use the API maximum. Results are revealed a page at a time in the UI ("Load more"),
+// so asking for more costs only a few KB of JSON; images load only for visible cards.
+export const RESULT_LIMIT = 50
+export const BROWSE_LIMIT = 50 // every category has fewer products than this
 
 export class ApiError extends Error {
   readonly status: number
@@ -85,8 +88,41 @@ async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> {
   return body as T
 }
 
-export function searchProducts(request: SearchRequest, signal?: AbortSignal): Promise<SearchResponse> {
-  return getJson<SearchResponse>(`/api/search?${buildSearchParams(request)}`, signal)
+export function searchProducts(request: SearchRequest, signal?: AbortSignal, limit = RESULT_LIMIT): Promise<SearchResponse> {
+  return getJson<SearchResponse>(`/api/search?${buildSearchParams(request, limit)}`, signal)
+}
+
+/**
+ * Lists products without a search query, alphabetically. The API has no paging and returns at
+ * most 50 products, so "all categories" is fetched one category at a time (each has far fewer
+ * than 50) and merged. Filtering still happens in the backend's SQL; nothing is re-implemented here.
+ */
+export async function browseProducts(
+  filters: SearchFilters,
+  categories: string[],
+  signal?: AbortSignal,
+): Promise<SearchResponse> {
+  const browse = (category: string) =>
+    searchProducts({ query: '', filters: { ...filters, category } }, signal, BROWSE_LIMIT)
+  if (filters.category) return browse(filters.category)
+
+  const responses = await Promise.all(categories.map(browse))
+  const results = responses
+    .flatMap((r) => r.results)
+    .sort((a, b) => a.name.localeCompare(b.name, 'en'))
+  const matching = responses.reduce((sum, r) => sum + r.meta.matchingFilters, 0)
+  return {
+    results,
+    meta: {
+      mode: 'browse',
+      outcome: results.length ? 'results' : 'no_filter_matches',
+      matchingFilters: matching,
+      relevantCount: matching,
+      returned: results.length,
+      minSimilarity: responses[0]?.meta.minSimilarity ?? 0,
+      tookMs: Math.max(0, ...responses.map((r) => r.meta.tookMs)),
+    },
+  }
 }
 
 export async function fetchCategories(signal?: AbortSignal): Promise<string[]> {

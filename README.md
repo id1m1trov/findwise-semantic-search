@@ -67,6 +67,24 @@ similarity, not a percentage) and `relevance` (`strong` / `good`). `meta.outcome
 `results`, `no_filter_matches` (filters exclude everything) or `no_relevant_matches`
 (nothing similar enough). Invalid parameters return `400` with the field and reason.
 
+## Demo store frontend
+
+The React app presents the search as a small shop, "Marlow & Co.": home page, category
+browsing, filters, product details and a cart. The cart is frontend-only (saved in
+`localStorage`, no checkout).
+
+Product photos come from [Unsplash](https://unsplash.com/license) and
+[Pexels](https://www.pexels.com/license/). Both licenses allow free use without attribution,
+so credits are not shown in the UI; the photographer and source page of every image are
+recorded in [`frontend/src/data/productImages.ts`](frontend/src/data/productImages.ts). Each photo
+was checked against its product; four products without an honest match (water filter straw,
+electric underblanket, doorway pull-up bar, heart-rate chest strap) show a placeholder.
+Images are loaded from the Unsplash and Pexels CDNs, not stored in this repository.
+
+Browsing "all products" without a query fetches one category at a time and merges the
+results, because the search API returns at most 50 products and has no paging; a production
+API would add an `offset` parameter instead.
+
 ## Evaluation and known limitations
 
 `npm run eval` measures the search implementation (HNSW vs exact search: identical in every

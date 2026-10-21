@@ -4,7 +4,13 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Semantic Product Search</title>
+    <link rel="preconnect" href="https://images.unsplash.com" />
+    <link rel="preconnect" href="https://images.pexels.com" />
+    <!-- Home page hero (the LCP image): start downloading it alongside the JavaScript instead of
+         after React renders. Must match HERO_PHOTO and the <picture> sources in HomeView.tsx. -->
+    <link rel="preload" as="image" fetchpriority="high" media="(max-width: 880px)" imagesrcset="https://images.unsplash.com/photo-1510312305653-8ed496efae75?w=480&amp;h=270&amp;fit=crop&amp;auto=format&amp;q=70 480w, https://images.unsplash.com/photo-1510312305653-8ed496efae75?w=700&amp;h=394&amp;fit=crop&amp;auto=format&amp;q=70 700w, https://images.unsplash.com/photo-1510312305653-8ed496efae75?w=1000&amp;h=563&amp;fit=crop&amp;auto=format&amp;q=70 1000w" imagesizes="(max-width: 720px) calc(100vw - 32px), calc(100vw - 48px)" />
+    <link rel="preload" as="image" fetchpriority="high" media="(min-width: 881px)" imagesrcset="https://images.unsplash.com/photo-1510312305653-8ed496efae75?w=600&amp;h=467&amp;fit=crop&amp;auto=format&amp;q=70 600w, https://images.unsplash.com/photo-1510312305653-8ed496efae75?w=900&amp;h=700&amp;fit=crop&amp;auto=format&amp;q=70 900w, https://images.unsplash.com/photo-1510312305653-8ed496efae75?w=1300&amp;h=1011&amp;fit=crop&amp;auto=format&amp;q=70 1300w" imagesizes="560px" />
+    <title>Marlow &amp; Co. · Demo store</title>
     <meta name="description" content="Proof-of-concept semantic product search: describe what you need and results are matched by meaning." />
   </head>
   <body>

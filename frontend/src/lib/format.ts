@@ -18,16 +18,27 @@ export function priceRangeError(filters: SearchFilters): string | null {
   return null
 }
 
+/** Label for the active price filter, describing exactly what is applied (bounds inclusive). */
+export function formatPriceRange(minPrice: string, maxPrice: string): string | null {
+  const min = minPrice.trim() === '' ? null : Number(minPrice)
+  const max = maxPrice.trim() === '' ? null : Number(maxPrice)
+  if (min !== null && max !== null) return `${formatPrice(min)} – ${formatPrice(max)}`
+  if (max !== null) return `Up to ${formatPrice(max)}`
+  if (min !== null) return `${formatPrice(min)} and up`
+  return null
+}
+
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`
 
-/** One-line explanation of what the pipeline did, shown above the results. */
-export function describeSearch(meta: SearchMeta, filtered: boolean): string {
-  const scope = filtered
-    ? `${plural(meta.matchingFilters, 'product')} ${meta.matchingFilters === 1 ? 'matches' : 'match'} your filters`
-    : `${plural(meta.matchingFilters, 'product')} searched`
-  if (meta.mode === 'browse') {
-    return `${scope} · sorted A–Z · describe what you need to rank them by meaning`
-  }
-  const shown = meta.returned < meta.relevantCount ? ` · showing the top ${meta.returned}` : ''
-  return `${scope} · ranked by meaning · ${meta.relevantCount} relevant${shown} · ${meta.tookMs} ms`
+/** Heading above the results, e.g. "6 products for “gift for a coffee lover”". */
+export function resultsHeading(meta: SearchMeta, query: string): string {
+  if (meta.mode === 'browse') return plural(meta.matchingFilters, 'product')
+  const shown = meta.relevantCount > meta.returned ? `Top ${meta.returned} of ${meta.relevantCount}` : plural(meta.returned, 'product')
+  return `${shown} for “${query.trim()}”`
+}
+
+/** Small technical note for the demo: what the pipeline did. */
+export function searchDetails(meta: SearchMeta): string {
+  if (meta.mode === 'browse') return 'Sorted A–Z'
+  return `Most relevant first · ${meta.matchingFilters} searched by meaning · ${meta.tookMs} ms`
 }

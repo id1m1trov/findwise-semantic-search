@@ -1,30 +1,52 @@
+import { memo } from 'react'
 import type { ProductResult } from '../api/searchApi.ts'
+import { photoUrl, productPhotos } from '../data/productImages.ts'
 import { formatPrice } from '../lib/format.ts'
+import { ProductImage } from './ProductImage.tsx'
 
-const relevanceLabel = { strong: 'Strong match', good: 'Good match' } as const
+interface ProductCardProps {
+  product: ProductResult
+  topMatch: boolean
+  priority: boolean // first row: load the image straight away instead of lazily
+  onOpen: (product: ProductResult) => void
+  headingLevel?: 'h2' | 'h3' // h3 where the cards sit under a section heading (home page)
+}
 
-export function ProductCard({ product }: { product: ProductResult }) {
+// memo: typing in the search box re-renders App, but a card only needs to re-render when its
+// own props change (product objects are stable between renders of the same results).
+export const ProductCard = memo(function ProductCard({ product, topMatch, priority, onOpen, headingLevel = 'h2' }: ProductCardProps) {
+  const photo = productPhotos[product.sku]
+  const Heading = headingLevel
+
   return (
-    <article className="card">
-      <div className="card-top">
-        <span className="tag">{product.category}</span>
-        {product.relevance && (
-          <span className={`badge badge-${product.relevance}`}>{relevanceLabel[product.relevance]}</span>
+    <article className="product">
+      <div className="product-image">
+        {photo ? (
+          <img
+            src={photoUrl(photo, 480)}
+            srcSet={`${photoUrl(photo, 240)} 240w, ${photoUrl(photo, 480)} 480w, ${photoUrl(photo, 800)} 800w`}
+            sizes="(max-width: 720px) 96px, 260px"
+            alt="" // decorative: the product name is right next to it
+            loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : 'auto'}
+            decoding="async"
+          />
+        ) : (
+          <ProductImage sku={product.sku} />
         )}
       </div>
-      <h3 className="card-title">{product.name}</h3>
-      <p className="card-description">{product.description}</p>
-      <div className="card-bottom">
-        <span className="price">{formatPrice(product.price)}</span>
-        {product.similarity !== null && (
-          <span
-            className="similarity"
-            title="Cosine similarity between your search and this product's description (0 = unrelated, 1 = same meaning). It is not a percentage or a probability."
-          >
-            similarity {product.similarity.toFixed(2)}
-          </span>
-        )}
+      <div className="product-body">
+        <p className="product-meta">{topMatch ? 'Top match' : product.category}</p>
+        <Heading className="product-name">
+          {/* One button per card; its ::after stretches over the whole card so the image is
+              clickable too, while keyboard users get a single tab stop. */}
+          <button type="button" className="product-link" onClick={() => onOpen(product)} aria-haspopup="dialog">
+            <span className="underline">{product.name}</span>
+          </button>
+        </Heading>
+        <p className="product-description">{product.description}</p>
+        <p className="product-price">{formatPrice(product.price)}</p>
       </div>
     </article>
   )
-}
+})
