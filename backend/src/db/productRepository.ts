@@ -11,7 +11,7 @@ export interface Product {
 
 export type NewProduct = Omit<Product, "id">;
 
-/** Structured filters. Prices are integer cents; bounds are inclusive. */
+/** Category and price filters. Prices are whole cents; both limits are inclusive. */
 export interface ProductFilters {
   category?: string;
   minPriceCents?: number;
@@ -43,13 +43,13 @@ const toProduct = (row: ProductRow): Product => ({
   priceCents: row.price_cents,
 });
 
-/** All SQL lives here. Everything is parameterised; no user input is concatenated into SQL. */
+/** All SQL lives here. User input is always passed as a parameter, never pasted into the SQL. */
 export class ProductRepository {
   constructor(private readonly db: Db) {}
 
   /**
-   * A number SQLite changes whenever *another* connection commits (e.g. `npm run ingest` while
-   * the server runs). Cheap to read, so it can be checked before every search.
+   * A counter SQLite changes whenever *another* connection writes, for example `npm run ingest`
+   * while the server runs. It's cheap to read, so it can be checked before every search.
    */
   dataVersion(): number {
     return this.db.pragma("data_version", { simple: true }) as number;
@@ -68,14 +68,14 @@ export class ProductRepository {
     return (rows as { category: string }[]).map((r) => r.category);
   }
 
-  /** Ids of every product matching the filters: the candidate set for vector search. */
+  /** Ids of every product that passes the filters. Vector search only ranks these. */
   findIds(filters: ProductFilters): number[] {
     const { where, params } = buildWhere(filters);
     const rows = this.db.prepare(`SELECT id FROM products ${where}`).all(params) as { id: number }[];
     return rows.map((r) => r.id);
   }
 
-  /** Plain filtered listing (used when the query is empty), alphabetical. */
+  /** Filtered products in alphabetical order, used when the search text is empty. */
   findByFilters(filters: ProductFilters, limit: number): Product[] {
     const { where, params } = buildWhere(filters);
     const rows = this.db
@@ -84,7 +84,7 @@ export class ProductRepository {
     return rows.map(toProduct);
   }
 
-  /** Loads products by id, preserving the order of `ids` (the ranking). Unknown ids are skipped. */
+  /** Loads products by id, in the same order as `ids` (the ranking). Unknown ids are skipped. */
   getByIds(ids: number[]): Product[] {
     if (ids.length === 0) return [];
     const placeholders = ids.map(() => "?").join(", ");
@@ -94,8 +94,8 @@ export class ProductRepository {
   }
 
   /**
-   * Makes the table match the catalog, keyed by SKU: inserts new SKUs, updates changed ones
-   * and deletes SKUs that are no longer in the catalog. Existing SKUs keep their id.
+   * Makes the table match the catalog, matching products by SKU: adds new ones, updates changed
+   * ones and deletes ones that are no longer in the catalog. Existing products keep their id.
    */
   syncCatalog(products: NewProduct[]): SyncStats {
     const stats: SyncStats = { inserted: 0, updated: 0, deleted: 0, unchanged: 0 };

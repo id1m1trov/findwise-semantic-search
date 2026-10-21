@@ -1,3 +1,4 @@
+// Price filter options: every price falls in exactly one option.
 import { describe, expect, it } from 'vitest'
 import { ANY_PRICE, isPresetActive, PRICE_PRESETS } from '../src/lib/pricePresets.ts'
 

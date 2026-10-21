@@ -4,7 +4,7 @@ import { MAX_QUANTITY } from '../lib/cart.ts'
 import { formatPrice } from '../lib/format.ts'
 import { ProductImage } from './ProductImage.tsx'
 
-/** Cart as a side drawer, built on a native modal <dialog> (focus trap and Escape for free). */
+/** The cart as a side panel, built on the browser's <dialog> (keeps focus inside, closes on Escape). */
 export function CartDrawer({ ref }: { ref: Ref<HTMLDialogElement> }) {
   const { items, count, total, setQuantity, remove } = useCart()
 

@@ -5,7 +5,7 @@ import type { Embedder } from "../embeddings/embedder.js";
 import { contentHash, embeddingText } from "../embeddings/embeddingText.js";
 import { VectorIndex } from "./vectorIndex.js";
 
-/** Saved next to the index file; describes exactly what the index was built from. */
+/** Saved next to the index file. Describes exactly what the index was built from. */
 export interface IndexMeta {
   fingerprint: string;
   model: string;
@@ -21,9 +21,9 @@ export interface EnsureIndexResult {
 }
 
 /**
- * One hash describing the whole index: every (id, content hash) pair plus the model and
- * dimension. Any added, deleted or edited product, a changed embedding recipe or a different
- * model produces a different fingerprint.
+ * One hash that describes the whole index: every product's id and text hash, plus the model
+ * and vector size. Adding, deleting or editing a product, changing the embedded text or
+ * switching models all give a different fingerprint.
  */
 export function computeFingerprint(products: Product[], model: string, dimension: number): string {
   const items = [...products].sort((a, b) => a.id - b.id).map((p) => [p.id, contentHash(p)]);
@@ -45,8 +45,8 @@ export async function buildIndex(products: Product[], embedder: Embedder): Promi
 }
 
 /**
- * Loads the saved index if it still matches SQLite (the source of truth); otherwise rebuilds
- * it from SQLite and saves it. Safe to call on every startup.
+ * Loads the saved index if it still matches SQLite; otherwise rebuilds it from SQLite and
+ * saves it. Safe to call on every startup.
  */
 export async function ensureIndex(options: {
   repo: ProductRepository;
@@ -81,8 +81,8 @@ export async function ensureIndex(options: {
     count: products.length,
     builtAt: new Date().toISOString(),
   };
-  // Metadata is written last: if we crash before this, the old fingerprint no longer
-  // matches and the next start simply rebuilds again.
+  // The metadata is written last. If we crash before this, the old fingerprint no longer
+  // matches, and the next start simply rebuilds again.
   const tmp = `${metaFile}.${process.pid}.${randomUUID()}.tmp`;
   writeFileSync(tmp, JSON.stringify(meta, null, 2));
   renameSync(tmp, metaFile);

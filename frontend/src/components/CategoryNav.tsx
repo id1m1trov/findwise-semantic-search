@@ -4,7 +4,7 @@ interface CategoryNavProps {
   onSelect: (category: string) => void
 }
 
-/** Shop-style category bar; doubles as the category filter (toggle buttons, not page links). */
+/** The category bar under the header. Each category is a button that shows that category. */
 export function CategoryNav({ categories, active, onSelect }: CategoryNavProps) {
   return (
     <nav className="category-nav" aria-label="Categories">

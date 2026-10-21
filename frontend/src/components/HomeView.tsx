@@ -36,8 +36,9 @@ export function HomeView({ categories, examples, featured, onExample, onCategory
           </div>
         </div>
         <div className="hero-image">
-          {/* This photo is the largest element on screen (LCP). Narrow screens show it in a 16:9
-              frame, so they get 16:9 crops in small steps instead of the taller desktop image. */}
+          {/* The biggest image on the page, so it decides how fast the page feels loaded (LCP).
+              Phones show it in a wide 16:9 frame, so they get smaller 16:9 crops instead of the
+              taller desktop image. */}
           <picture>
             <source
               media="(max-width: 880px)"

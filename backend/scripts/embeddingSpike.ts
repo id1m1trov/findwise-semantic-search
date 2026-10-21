@@ -1,5 +1,5 @@
-// Spike: verify local embeddings work on this machine and that semantic similarity
-// behaves sensibly for the brief's example query. Throwaway code, not part of the app.
+// Spike: a quick check that the embedding model runs on this machine and gives sensible
+// similarity scores for the brief's example query. Throwaway code, not part of the app.
 import { pipeline } from "@huggingface/transformers";
 
 const products = [
@@ -16,7 +16,7 @@ const t0 = performance.now();
 const embed = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2", { dtype: "q8" });
 const t1 = performance.now();
 
-// mean pooling + L2 normalisation -> cosine similarity is just a dot product
+// averaged and normalised vectors, so cosine similarity is just a dot product
 const toVectors = async (texts: string[]) =>
   (await embed(texts, { pooling: "mean", normalize: true })).tolist() as number[][];
 

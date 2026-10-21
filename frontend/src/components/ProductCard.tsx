@@ -12,8 +12,8 @@ interface ProductCardProps {
   headingLevel?: 'h2' | 'h3' // h3 where the cards sit under a section heading (home page)
 }
 
-// memo: typing in the search box re-renders App, but a card only needs to re-render when its
-// own props change (product objects are stable between renders of the same results).
+// memo: typing in the search box re-renders the whole app, but a card only needs to re-render
+// when its own product changes. This keeps typing smooth with many cards on screen.
 export const ProductCard = memo(function ProductCard({ product, topMatch, priority, onOpen, headingLevel = 'h2' }: ProductCardProps) {
   const photo = productPhotos[product.sku]
   const Heading = headingLevel
@@ -38,8 +38,8 @@ export const ProductCard = memo(function ProductCard({ product, topMatch, priori
       <div className="product-body">
         <p className="product-meta">{topMatch ? 'Top match' : product.category}</p>
         <Heading className="product-name">
-          {/* One button per card; its ::after stretches over the whole card so the image is
-              clickable too, while keyboard users get a single tab stop. */}
+          {/* One button per card, stretched over the whole card so the image is clickable too.
+              Keyboard users only have to tab past one element per card. */}
           <button type="button" className="product-link" onClick={() => onOpen(product)} aria-haspopup="dialog">
             <span className="underline">{product.name}</span>
           </button>

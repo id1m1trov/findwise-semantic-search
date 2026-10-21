@@ -37,7 +37,7 @@ export function resultsHeading(meta: SearchMeta, query: string): string {
   return `${shown} for “${query.trim()}”`
 }
 
-/** Small technical note for the demo: what the pipeline did. */
+/** A short note next to the results about what the search did, e.g. how many products it compared. */
 export function searchDetails(meta: SearchMeta): string {
   if (meta.mode === 'browse') return 'Sorted A–Z'
   return `Most relevant first · ${meta.matchingFilters} searched by meaning · ${meta.tookMs} ms`

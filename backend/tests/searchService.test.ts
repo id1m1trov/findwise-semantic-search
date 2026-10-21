@@ -1,4 +1,4 @@
-// Search pipeline tests (filter -> rank -> load) with the fake embedder.
+// The search pipeline (filter -> rank -> load), using the fake embedder instead of the real model.
 import { describe, expect, it } from "vitest";
 import { SearchService } from "../src/search/searchService.js";
 import { buildIndex } from "../src/vector/indexManager.js";

@@ -8,7 +8,7 @@ export interface SearchParams {
   limit: number;
 }
 
-/** A display band, not a probability: derived from cosine-similarity cut-offs. */
+/** A label based on the similarity score. It is not a probability. */
 export type Relevance = "strong" | "good";
 
 export interface SearchHit {
@@ -23,7 +23,7 @@ export interface SearchMeta {
   mode: "semantic" | "browse";
   outcome: SearchOutcome;
   matchingFilters: number; // products that passed the SQL filters
-  relevantCount: number; // of those, how many scored above the cut-off (browse: = matchingFilters)
+  relevantCount: number; // of those, how many scored above the cut-off (when browsing: all of them)
   returned: number;
   minSimilarity: number;
   tookMs: number;
@@ -43,10 +43,10 @@ export interface SearchServiceOptions {
 }
 
 /**
- * Hybrid search in three stages:
- *   1. filter: SQLite returns the ids allowed by category / price
- *   2. rank:   the query vector is compared only against those ids in the HNSW index
- *   3. load:   SQLite returns the full rows for the ranked ids; weak matches are dropped
+ * Search in three stages:
+ *   1. filter: SQLite returns the ids that match the category and price
+ *   2. rank:   HNSW compares the query's vector with those products only
+ *   3. load:   SQLite returns the full products in ranked order; weak matches are dropped
  */
 export class SearchService {
   constructor(private readonly options: SearchServiceOptions) {}
@@ -80,7 +80,7 @@ export class SearchService {
       return done([], { mode: "semantic", outcome: "no_filter_matches", matchingFilters: 0, relevantCount: 0 });
     }
 
-    // 2. rank: every candidate is ranked so we can report how many are relevant
+    // 2. rank: every filtered product is ranked, so we can report how many are relevant
     const [queryVector] = await embedder.embed([trimmed]);
     const index = await this.options.index.get();
     const ranked = index.search(queryVector, candidateIds.length, new Set(candidateIds));

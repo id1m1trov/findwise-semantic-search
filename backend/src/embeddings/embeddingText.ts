@@ -2,14 +2,14 @@ import { createHash } from "node:crypto";
 import type { Product } from "../db/productRepository.js";
 
 /**
- * The exact text that gets embedded for a product. Changing this recipe changes every
- * content hash, so the index fingerprint changes and the index is rebuilt automatically.
+ * The exact text that gets turned into a product's vector. If you change it, every product's
+ * hash changes, so the index is rebuilt automatically on the next start.
  */
 export function embeddingText(product: Pick<Product, "name" | "description">): string {
   return `${product.name}. ${product.description}`;
 }
 
-/** SHA-256 of the embedded text: changes whenever the text the vector was built from changes. */
+/** A hash of the embedded text. It changes whenever the text behind the vector changes. */
 export function contentHash(product: Pick<Product, "name" | "description">): string {
   return createHash("sha256").update(embeddingText(product)).digest("hex");
 }

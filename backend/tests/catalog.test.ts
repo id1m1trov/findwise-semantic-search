@@ -1,4 +1,4 @@
-// Validates the catalog parser and the real dataset files.
+// Price conversion, catalog validation, and checks on the real product and evaluation files.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { loadCatalog, maxPriceToCents, minPriceToCents, parseCatalog, toCents } from "../src/catalog/catalog.js";

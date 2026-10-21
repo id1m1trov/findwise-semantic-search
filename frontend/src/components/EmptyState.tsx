@@ -8,8 +8,9 @@ interface EmptyStateProps {
 }
 
 /**
- * Plain, left-aligned message for empty and error states. Its title is the page's h1.
- * Neutral outcomes are announced by the live region in SearchResults; errors use role="alert".
+ * The message shown when there are no results or something went wrong. Its title is the page's
+ * h1. Screen readers hear normal messages through SearchResults; errors are announced right away
+ * with role="alert".
  */
 export function EmptyState({ tone = 'neutral', title, children, action }: EmptyStateProps) {
   return (

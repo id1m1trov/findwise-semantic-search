@@ -1,8 +1,8 @@
-// Relevance evaluation: `npm run eval`.
-// Answers two separate questions:
-//   1. Does the embedding model rank the right products first?  (hit@3, MRR vs expected SKUs)
-//   2. Does HNSW return the true nearest neighbours?            (recall@10 vs exact brute force)
-// Works on an in-memory copy of the catalog, so it never touches the app's database.
+// Search quality evaluation: `npm run eval`. Results are explained in docs/evaluation.
+// It answers two separate questions:
+//   1. Does the model rank the right products first?        (hit@3 and MRR against expected SKUs)
+//   2. Does HNSW return the same results as an exact search? (recall@10)
+// It works on an in-memory copy of the catalog, so it never touches the app's database.
 import { readFileSync } from "node:fs";
 import { loadCatalog, maxPriceToCents, minPriceToCents } from "../src/catalog/catalog.js";
 import { config } from "../src/config.js";
@@ -99,7 +99,7 @@ async function runRankingCase(c: RankingCase, prepared: Awaited<ReturnType<typeo
   };
 }
 
-/** Top results as the app would label them: strong / good / hidden (below the cut-off). */
+/** The top results, labelled the way the API labels them: strong, good, or hidden (below the cut-off). */
 function printRanking(c: RankingCase, r: CaseResult) {
   const band = (s: number) => (s >= config.strongSimilarity ? "strong" : s >= config.minSimilarity ? "good" : "hidden");
   r.ranked.slice(0, 8).forEach((x, i) => {
@@ -183,7 +183,7 @@ for (const [name, results] of Object.entries(allResults)) {
 }
 console.log(`No-result cases: ${noResultPasses}/${evalFile.noResults.length} passed`);
 
-// Threshold calibration: the cut-off must sit above unrelated queries and below real matches.
+// Checking the cut-off: it should be above the scores of unrelated queries and below real matches.
 const relevantSims = [...evalFile.semantic, ...evalFile.combined].map((_, i) =>
   [...allResults[rankingGroups[0][0]], ...allResults[rankingGroups[1][0]]][i].bestRelevantSimilarity,
 );
@@ -192,7 +192,7 @@ console.log(
     `highest no-result similarity ${Math.max(...noResultTopSims).toFixed(3)} (current cut-off ${config.minSimilarity}, strong ${config.strongSimilarity})`,
 );
 
-// Recipe comparison: is it worth adding the category to the embedded text?
+// Does adding the category to the embedded text help?
 const withCategory = await prepare((p) => `${p.name}. ${p.category}. ${p.description}`);
 const variant = summarise(await runGroup("", evalFile.semantic, withCategory, false));
 const base = summarise(allResults[rankingGroups[0][0]]);

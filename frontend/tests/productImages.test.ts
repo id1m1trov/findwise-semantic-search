@@ -1,3 +1,4 @@
+// Product photos: each belongs to a real product, credits its photographer, and every category has a cover.
 import { describe, expect, it } from 'vitest'
 import catalog from '../../backend/data/products.json'
 import { categoryCover, photoPageUrl, photoUrl, productPhotos } from '../src/data/productImages.ts'

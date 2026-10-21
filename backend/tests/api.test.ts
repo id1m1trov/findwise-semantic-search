@@ -1,4 +1,4 @@
-// HTTP layer tests: validation, response shape and error handling.
+// The HTTP API: parameter validation, response shape, error handling and serving the built frontend.
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";

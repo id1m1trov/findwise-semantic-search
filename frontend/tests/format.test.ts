@@ -1,3 +1,4 @@
+// Price formatting, price-range validation and the wording of result headings.
 import { describe, expect, it } from 'vitest'
 import type { SearchMeta } from '../src/api/searchApi.ts'
 import {

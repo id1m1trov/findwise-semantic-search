@@ -1,6 +1,6 @@
 import type { Ref } from 'react'
 
-/** Native <dialog>: focus is trapped and Escape closes it without extra code. */
+/** Uses the browser's built-in <dialog>: it keeps keyboard focus inside and closes on Escape. */
 export function HowItWorksDialog({ ref }: { ref: Ref<HTMLDialogElement> }) {
   return (
     <dialog ref={ref} className="dialog" aria-labelledby="how-it-works-title">

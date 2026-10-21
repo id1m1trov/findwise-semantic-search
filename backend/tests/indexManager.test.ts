@@ -1,4 +1,4 @@
-// Staleness checks: the index must be rebuilt exactly when SQLite or the model changed.
+// The vector index is rebuilt exactly when the products or the model changed, and not otherwise.
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";

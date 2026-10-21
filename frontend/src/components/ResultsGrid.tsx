@@ -20,9 +20,9 @@ interface ResultsGridProps {
 export function ResultsGrid({ data, query, loading, onOpenProduct, filterBar }: ResultsGridProps) {
   const pageSize = useMediaQuery('(max-width: 720px)') ? PAGE_SIZE_MOBILE : PAGE_SIZE_DESKTOP
 
-  // Pages are remembered together with the results they belong to. New results (a new search,
-  // filter or category) arrive as a new object, so the count falls back to one page by itself,
-  // without an effect that would first render the old count and then correct it.
+  // The page count is stored together with the results it belongs to. A new search, filter or
+  // category brings a new results object, so the count goes back to one page by itself. (Resetting
+  // it in an effect would briefly show the old count first.)
   const [paging, setPaging] = useState({ data, pages: 1 })
   const pages = paging.data === data ? paging.pages : 1
   const { results, meta } = data

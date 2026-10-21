@@ -20,9 +20,9 @@ interface SyncedIndexOptions {
 }
 
 /**
- * Keeps the in-memory index in step with SQLite while the server runs. Before handing out the
- * index it checks SQLite's data_version; if another process (e.g. `npm run ingest`) changed the
- * database, it re-runs the same load-or-rebuild check used at startup.
+ * Keeps the in-memory index up to date with SQLite while the server runs. Before each search it
+ * checks SQLite's data_version. If another process (such as `npm run ingest`) changed the
+ * database, it runs the same check as at startup: load the saved index, or rebuild it.
  */
 export class SyncedIndex implements IndexSource {
   private refreshing?: Promise<void>;
@@ -45,7 +45,7 @@ export class SyncedIndex implements IndexSource {
 
   async get(): Promise<VectorIndex> {
     if (this.options.repo.dataVersion() !== this.dataVersion) {
-      // Concurrent searches share one refresh instead of each starting their own.
+      // Searches arriving at the same time share one refresh instead of each starting their own.
       this.refreshing ??= this.refresh().finally(() => (this.refreshing = undefined));
       await this.refreshing;
     }

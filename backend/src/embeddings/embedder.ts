@@ -13,7 +13,7 @@ type Extractor = (
   options: { pooling: "mean"; normalize: boolean },
 ) => Promise<{ tolist(): number[][] }>;
 
-/** Runs a sentence-transformer model locally with transformers.js (ONNX on CPU, no API key). */
+/** Runs the embedding model locally on the CPU with transformers.js. No API key needed. */
 export class TransformersEmbedder implements Embedder {
   private extractor?: Promise<Extractor>;
 
@@ -33,8 +33,8 @@ export class TransformersEmbedder implements Embedder {
       this.extractor = pipeline("feature-extraction", this.modelName, { dtype: "q8" }) as unknown as Promise<Extractor>;
     }
     const extract = await this.extractor;
-    // Mean pooling averages the token vectors into one sentence vector; normalising it
-    // makes cosine similarity a plain dot product.
+    // "mean" averages the vectors of the individual words into one vector for the whole text.
+    // Normalising it (length 1) makes cosine similarity a simple dot product.
     const vectors = (await extract(texts, { pooling: "mean", normalize: true })).tolist();
     if (vectors[0]?.length !== this.dimension) {
       throw new Error(`Model ${this.modelName} returned ${vectors[0]?.length} dimensions, expected ${this.dimension}`);

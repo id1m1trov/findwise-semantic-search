@@ -1,4 +1,4 @@
-// End-to-end with the real MiniLM model and the real 72-product catalog (slower: loads the model).
+// End to end with the real model and the real 72-product catalog. Slower, because it loads the model.
 import { beforeAll, describe, expect, it } from "vitest";
 import { loadCatalog } from "../../src/catalog/catalog.js";
 import { config } from "../../src/config.js";

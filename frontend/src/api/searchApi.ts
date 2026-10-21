@@ -1,4 +1,4 @@
-// Typed client for the backend API. These types mirror the JSON the backend returns.
+// Functions for calling the backend API. The types match the JSON the backend returns.
 
 export type Relevance = 'strong' | 'good'
 
@@ -41,8 +41,8 @@ export interface SearchRequest {
   filters: SearchFilters
 }
 
-// Both use the API maximum. Results are revealed a page at a time in the UI ("Load more"),
-// so asking for more costs only a few KB of JSON; images load only for visible cards.
+// Both ask for the API's maximum. The UI shows results a page at a time ("Load more"), so the
+// extra results only cost a few KB of JSON; images only load for cards that are shown.
 export const RESULT_LIMIT = 50
 export const BROWSE_LIMIT = 50 // every category has fewer products than this
 
@@ -77,8 +77,8 @@ async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> {
   }
   const body = await response.json().catch(() => null)
   if (!response.ok) {
-    // Our backend always answers with JSON { error, details? }. A 5xx without it comes from a
-    // proxy in between (e.g. the Vite dev server when the backend is not running).
+    // The backend always answers errors with JSON { error, details? }. A server error without it
+    // comes from something in between, for example the Vite dev server when the backend isn't running.
     if (!body?.error && response.status >= 500) {
       throw new ApiError('The search service is unavailable. Is the backend running?', response.status)
     }
@@ -93,9 +93,9 @@ export function searchProducts(request: SearchRequest, signal?: AbortSignal, lim
 }
 
 /**
- * Lists products without a search query, alphabetically. The API has no paging and returns at
- * most 50 products, so "all categories" is fetched one category at a time (each has far fewer
- * than 50) and merged. Filtering still happens in the backend's SQL; nothing is re-implemented here.
+ * Lists products alphabetically when there is no search text. The API returns at most 50
+ * products and has no paging, so "all categories" is fetched one category at a time (each has far
+ * fewer than 50) and merged. The filtering itself still happens in the backend.
  */
 export async function browseProducts(
   filters: SearchFilters,

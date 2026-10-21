@@ -1,3 +1,4 @@
+// Cart logic: adding, removing and changing quantities, totals, and reading a saved cart safely.
 import { describe, expect, it } from 'vitest'
 import { type CartItem, cartCount, cartReducer, cartTotal, MAX_QUANTITY, parseStoredCart } from '../src/lib/cart.ts'
 

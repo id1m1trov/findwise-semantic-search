@@ -1,5 +1,5 @@
-// Spike: verify hnswlib-node works end to end with real embeddings:
-// plain kNN, filter callback (our SQL-prefilter design), edge cases, save/load.
+// Spike: a quick check that hnswlib-node works with real embeddings: plain search, searching
+// only allowed ids (how the app combines it with SQL filters), edge cases, and save/load.
 // Throwaway code, not part of the app.
 import { mkdtempSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -9,7 +9,7 @@ import { pipeline } from "@huggingface/transformers";
 
 const { HierarchicalNSW } = hnswlib;
 
-// id -> text; ids mimic SQLite primary keys (not 0..n, to prove labels are arbitrary ints)
+// id -> text. The ids are like SQLite ids (not 0..n), to show any whole number works as a label.
 const products = new Map<number, { text: string; category: string }>([
   [101, { text: "Stainless steel vacuum thermos that keeps drinks hot for 12 hours", category: "outdoor" }],
   [102, { text: "Insulated travel mug with leak-proof lid", category: "kitchen" }],
@@ -44,12 +44,12 @@ check("index built", index.getCurrentCount() === ids.length, `${index.getCurrent
 const show = (r: { neighbors: number[]; distances: number[] }) =>
   r.neighbors.map((id, i) => `${id}:${(1 - r.distances[i]).toFixed(3)}`).join(", ");
 
-// --- 1. plain kNN: cosine space returns distance = 1 - cosine similarity ---
+// --- 1. plain search: for cosine, hnswlib returns distance = 1 - similarity ---
 const plain = index.searchKnn(queryVec, 3);
 console.log(`      top 3 (id:similarity): ${show(plain)}`);
 check("plain search ranks thermos (101) first", plain.neighbors[0] === 101);
 
-// --- 2. filter callback: only ids allowed by a (simulated) SQL WHERE clause ---
+// --- 2. filtered search: only ids allowed by a (pretend) SQL filter ---
 const kitchenIds = new Set(ids.filter((id) => products.get(id)!.category === "kitchen"));
 const filtered = index.searchKnn(queryVec, 2, (label: number) => kitchenIds.has(label));
 console.log(`      kitchen-only: ${show(filtered)}`);

@@ -1,3 +1,4 @@
+// API client: request URLs, merging per-category results, and readable error messages.
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ApiError, browseProducts, buildSearchParams, searchProducts } from '../src/api/searchApi.ts'
 

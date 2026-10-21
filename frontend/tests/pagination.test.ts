@@ -1,3 +1,4 @@
+// "Load more" paging: how many products are shown after each click.
 import { describe, expect, it } from 'vitest'
 import { PAGE_SIZE_DESKTOP, PAGE_SIZE_MOBILE, pageInfo } from '../src/lib/pagination.ts'
 

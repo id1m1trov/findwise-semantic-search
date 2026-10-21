@@ -17,7 +17,10 @@ export interface VectorHit {
 
 const RANDOM_SEED = 42; // fixed so rebuilding the same data gives the same graph
 
-/** Thin wrapper around hnswlib-node: cosine space, integer labels, filtered search, atomic save. */
+/**
+ * Small wrapper around hnswlib-node: stores one vector per product id, searches by cosine
+ * similarity (optionally only among allowed ids), and saves safely to disk.
+ */
 export class VectorIndex {
   private constructor(
     private readonly hnsw: Hnsw,
@@ -45,9 +48,9 @@ export class VectorIndex {
   }
 
   /**
-   * Returns up to `k` nearest neighbours, best first. When `allowedIds` is given, only those
-   * labels can be returned (the SQL pre-filter). `ef` is set to at least the index size, so at
-   * this catalog size the search is effectively exhaustive and therefore exact.
+   * Returns up to `k` closest products, best first. When `allowedIds` is given (the ids that
+   * passed the SQL filters), only those can be returned. `ef` is set to at least the number of
+   * products, so HNSW checks every product and the result is exact at this size.
    */
   search(vector: number[], k: number, allowedIds?: ReadonlySet<number>): VectorHit[] {
     const limit = Math.min(k, allowedIds?.size ?? this.size, this.size);
@@ -55,13 +58,14 @@ export class VectorIndex {
     this.hnsw.setEf(Math.max(this.size, limit));
     const filter = allowedIds ? (label: number) => allowedIds.has(label) : undefined;
     const { neighbors, distances } = this.hnsw.searchKnn(Array.from(vector), limit, filter);
-    // In cosine space hnswlib returns distance = 1 - cosine similarity.
+    // hnswlib returns a distance; for cosine, distance = 1 - similarity.
     return neighbors.map((id, i) => ({ id, similarity: 1 - distances[i] }));
   }
 
   /**
-   * Writes to a temp file first, then renames, so a crash never leaves a half-written index.
-   * The temp name is unique so the server and the ingest script can save at the same time.
+   * Writes to a temporary file first, then renames it, so a crash never leaves a half-written
+   * index. The temporary name is unique, so the server and the ingest script can both save at
+   * the same time.
    */
   save(file: string): void {
     const tmp = `${file}.${process.pid}.${randomUUID()}.tmp`;

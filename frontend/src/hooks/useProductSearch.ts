@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { browseProducts, type SearchRequest, type SearchResponse, searchProducts } from '../api/searchApi.ts'
 
-/** What the shop page shows: a semantic search when there is a query, otherwise a browse. */
+/** What the shop page shows: search results when there is search text, otherwise a plain list. */
 export interface ShopRequest extends SearchRequest {
   categories: string[] // needed to browse "all categories" (see browseProducts)
 }
@@ -19,9 +19,10 @@ const run = ({ query, filters, categories }: ShopRequest, signal: AbortSignal) =
   query.trim() ? searchProducts({ query, filters }, signal) : browseProducts(filters, categories, signal)
 
 /**
- * Runs a search or browse whenever `request` changes (null = nothing to show yet).
- * A newer request aborts the older one, so a slow response can never overwrite a newer result.
- * Loading is derived, not stored: if the last answer belongs to a different request, we are loading.
+ * Runs a search (or lists products) whenever `request` changes (null = nothing to show yet).
+ * A newer request cancels the older one, so a slow response can never overwrite a newer result.
+ * There is no separate loading flag: if the last answer belongs to a different request, we're
+ * still loading.
  */
 export function useProductSearch(request: ShopRequest | null) {
   const [settled, setSettled] = useState<Settled | null>(null)

@@ -1,4 +1,4 @@
-// Filter tests: SQL only, no embeddings. If these fail, the problem is in the structured filtering.
+// Filter tests: SQL only, no model. If these fail, the problem is in the category or price filtering.
 import { describe, expect, it } from "vitest";
 import { createFixtureRepo, fixtureProducts, skus } from "./helpers/fixtures.js";
 

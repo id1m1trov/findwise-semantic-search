@@ -80,7 +80,7 @@ function Shop() {
   }, [categories])
 
   // The category applies immediately; typed prices wait until the user pauses.
-  // (Strings, not an object: a new object every render would restart the debounce forever.)
+  // (Two strings, not one object: a new object on every render would keep restarting the wait.)
   const minPrice = useDebouncedValue(filters.minPrice, 400)
   const maxPrice = useDebouncedValue(filters.maxPrice, 400)
   const activeFilters = useMemo(
@@ -89,7 +89,7 @@ function Shop() {
   )
   const priceError = priceRangeError(filters)
 
-  // On the shop page an empty query browses the (filtered) catalog; null = nothing to load yet.
+  // On the shop page, empty search text lists the (filtered) products; null = nothing to load yet.
   const request = useMemo<ShopRequest | null>(() => {
     if (view !== 'shop' || priceRangeError(activeFilters)) return null
     const browsingAll = !query.trim() && !activeFilters.category

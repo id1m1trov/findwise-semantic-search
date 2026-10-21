@@ -1,4 +1,5 @@
-// Ingestion: products.json -> SQLite (by SKU) -> vector index (rebuilt only if something changed).
+// `npm run ingest`: copies products.json into SQLite (matched by SKU), then rebuilds the vector
+// index if anything changed.
 import { mkdirSync } from "node:fs";
 import { loadCatalog } from "../src/catalog/catalog.js";
 import { config } from "../src/config.js";
