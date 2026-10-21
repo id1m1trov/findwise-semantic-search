@@ -1,4 +1,5 @@
-import { mkdirSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
+import path from "node:path";
 import { createApp } from "./api/app.js";
 import { loadCatalog } from "./catalog/catalog.js";
 import { config } from "./config.js";
@@ -18,7 +19,7 @@ if (repo.count() === 0) {
   console.log(`[startup] seeded database with ${stats.inserted} products`);
 }
 
-const embedder = new TransformersEmbedder(config.embeddingModel, config.embeddingDimension);
+const embedder = new TransformersEmbedder(config.embeddingModel, config.embeddingDimension, config.modelCacheDir);
 const { index, rebuilt, reason } = await SyncedIndex.open({
   repo,
   embedder,
@@ -38,6 +39,9 @@ const searchService = new SearchService({
   strongSimilarity: config.strongSimilarity,
 });
 
-createApp({ repo, searchService }).listen(config.port, () => {
+const staticDir = existsSync(path.join(config.frontendDistDir, "index.html")) ? config.frontendDistDir : undefined;
+console.log(`[startup] ${staticDir ? "serving the frontend build from frontend/dist" : "API only (no frontend build found)"}`);
+
+createApp({ repo, searchService, staticDir }).listen(config.port, () => {
   console.log(`[startup] backend listening on http://localhost:${config.port}`);
 });

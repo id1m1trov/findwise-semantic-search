@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
-import { ensureIndex } from "../src/vector/indexManager.js";
+import { buildIndex, ensureIndex } from "../src/vector/indexManager.js";
 import { FakeEmbedder } from "./helpers/fakeEmbedder.js";
 import { createFixtureRepo, fixtureProducts } from "./helpers/fixtures.js";
 
@@ -69,5 +69,35 @@ describe("ensureIndex", () => {
   it("rebuilds when the index file is missing", async () => {
     const result = await rerunAfter(() => rmSync(files.indexFile));
     expect(result.rebuilt).toBe(true);
+  });
+});
+
+describe("buildIndex", () => {
+  it("embeds in small batches and keeps every product's vector under its own id", async () => {
+    // One-hot vectors (product n -> axis n) make it exact which vector belongs to which product.
+    const calls: number[] = [];
+    const oneHot = (text: string) => {
+      const v = new Array<number>(64).fill(0);
+      v[Number(/item(\d+)/.exec(text)?.[1])] = 1;
+      return v;
+    };
+    const embedder = {
+      modelName: "one-hot",
+      dimension: 64,
+      embed: async (texts: string[]) => (calls.push(texts.length), texts.map(oneHot)),
+    };
+    const products = Array.from({ length: 40 }, (_, i) => ({
+      id: i + 1,
+      sku: `SKU-${i + 1}`,
+      name: `item${i + 1}`,
+      description: "test product",
+      category: "Test",
+      priceCents: 100,
+    }));
+
+    const index = await buildIndex(products, embedder);
+    expect(calls).toEqual([16, 16, 8]);
+    expect(index.size).toBe(40);
+    for (const p of products) expect(index.search(oneHot(`item${p.id}`), 1)[0].id).toBe(p.id);
   });
 });

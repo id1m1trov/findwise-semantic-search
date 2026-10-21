@@ -17,7 +17,7 @@ console.log(
 
 const { index, rebuilt, reason } = await ensureIndex({
   repo,
-  embedder: new TransformersEmbedder(config.embeddingModel, config.embeddingDimension),
+  embedder: new TransformersEmbedder(config.embeddingModel, config.embeddingDimension, config.modelCacheDir),
   indexFile: config.indexFile,
   metaFile: config.indexMetaFile,
 });

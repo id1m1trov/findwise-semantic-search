@@ -16,6 +16,7 @@
     "eval": "npm run eval -w backend",
     "spike:embeddings": "npm run spike:embeddings -w backend",
     "spike:hnsw": "npm run spike:hnsw -w backend",
-    "build": "npm run build -w backend && npm run build -w frontend"
+    "build": "npm run build -w backend && npm run build -w frontend",
+    "start": "npm start -w backend"
   }
 }

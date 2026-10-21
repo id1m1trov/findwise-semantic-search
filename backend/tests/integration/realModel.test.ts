@@ -13,7 +13,7 @@ describe("semantic search with the real model", () => {
 
   beforeAll(async () => {
     const repo = createFixtureRepo(loadCatalog(config.catalogFile));
-    const embedder = new TransformersEmbedder(config.embeddingModel, config.embeddingDimension);
+    const embedder = new TransformersEmbedder(config.embeddingModel, config.embeddingDimension, config.modelCacheDir);
     service = new SearchService({
       repo,
       embedder,

@@ -47,7 +47,7 @@ repo.syncCatalog(loadCatalog(config.catalogFile));
 const products = repo.listAll();
 const byId = new Map(products.map((p) => [p.id, p]));
 const skuToId = new Map(products.map((p) => [p.sku, p.id]));
-const embedder = new TransformersEmbedder(config.embeddingModel, config.embeddingDimension);
+const embedder = new TransformersEmbedder(config.embeddingModel, config.embeddingDimension, config.modelCacheDir);
 
 const toFilters = (f: EvalFilters = {}): ProductFilters => ({
   category: f.category,

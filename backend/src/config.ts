@@ -13,6 +13,11 @@ export const config = {
   databaseFile: path.join(generatedDir, "products.db"),
   indexFile: path.join(generatedDir, "products.hnsw"),
   indexMetaFile: path.join(generatedDir, "products.hnsw.meta.json"),
+  // Downloaded model files; kept with the other generated files so a deploy build bundles them.
+  modelCacheDir: path.join(generatedDir, "model-cache"),
+
+  // The production frontend build, served by the backend when it exists.
+  frontendDistDir: path.join(backendRoot, "..", "frontend", "dist"),
 
   embeddingModel: "Xenova/all-MiniLM-L6-v2",
   embeddingDimension: 384,

@@ -1,6 +1,9 @@
 // HTTP layer tests: validation, response shape and error handling.
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import request from "supertest";
-import { describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 import { createApp } from "../src/api/app.js";
 import { SearchService } from "../src/search/searchService.js";
 import { buildIndex } from "../src/vector/indexManager.js";
@@ -114,5 +117,48 @@ describe("other routes", () => {
     const res = await request(app).get("/api/nope");
     expect(res.status).toBe(404);
     expect(res.body).toEqual({ error: "Not found" });
+  });
+});
+
+describe("serving the frontend build", () => {
+  const distDir = mkdtempSync(path.join(tmpdir(), "frontend-dist-"));
+  mkdirSync(path.join(distDir, "assets"));
+  writeFileSync(path.join(distDir, "index.html"), "<!doctype html><title>Marlow</title>");
+  writeFileSync(path.join(distDir, "assets", "index-abc123.js"), "console.log('app')");
+  const site = createApp({ repo, searchService, staticDir: distDir });
+  afterAll(() => rmSync(distDir, { recursive: true, force: true }));
+
+  it("serves index.html at / without long caching", async () => {
+    const res = await request(site).get("/");
+    expect(res.status).toBe(200);
+    expect(res.text).toContain("<title>Marlow</title>");
+    expect(res.headers["cache-control"]).toBe("no-cache");
+  });
+
+  it("caches hashed assets for a year", async () => {
+    const res = await request(site).get("/assets/index-abc123.js");
+    expect(res.status).toBe(200);
+    expect(res.headers["cache-control"]).toBe("public, max-age=31536000, immutable");
+  });
+
+  it("falls back to index.html for other page paths", async () => {
+    const res = await request(site).get("/some/page");
+    expect(res.status).toBe(200);
+    expect(res.text).toContain("<title>Marlow</title>");
+  });
+
+  it("returns 404 for missing files instead of the page", async () => {
+    expect((await request(site).get("/assets/missing.js")).status).toBe(404);
+  });
+
+  it("keeps the API and its JSON 404", async () => {
+    expect((await request(site).get("/api/health")).body).toEqual({ status: "ok", products: 6 });
+    const res = await request(site).get("/api/nope");
+    expect(res.status).toBe(404);
+    expect(res.body).toEqual({ error: "Not found" });
+  });
+
+  it("serves no pages when no build folder is given", async () => {
+    expect((await request(app).get("/")).status).toBe(404);
   });
 });

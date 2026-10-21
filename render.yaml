@@ -1,0 +1,15 @@
+# Render Blueprint: one web service that builds both workspaces, prepares the database and
+# vector index at build time, and serves the API plus the built frontend from Express.
+services:
+  - type: web
+    name: marlow-semantic-search
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm ci && npm run build && npm run ingest
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: "10000"

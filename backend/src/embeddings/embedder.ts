@@ -1,4 +1,4 @@
-import { pipeline } from "@huggingface/transformers";
+import { env, pipeline } from "@huggingface/transformers";
 
 /** Turns texts into vectors. Implemented by the local model and by a fake in tests. */
 export interface Embedder {
@@ -20,12 +20,18 @@ export class TransformersEmbedder implements Embedder {
   constructor(
     readonly modelName: string,
     readonly dimension: number,
+    /** Where downloaded model files are stored; defaults to the library's own cache folder. */
+    private readonly cacheDir?: string,
   ) {}
 
   async embed(texts: string[]): Promise<number[][]> {
     if (texts.length === 0) return [];
     // Load the model once, on first use; later calls reuse the same promise.
-    this.extractor ??= pipeline("feature-extraction", this.modelName, { dtype: "q8" }) as unknown as Promise<Extractor>;
+    if (!this.extractor) {
+      // Set globally: the per-call `cache_dir` option is not applied to every model file.
+      if (this.cacheDir) env.cacheDir = this.cacheDir;
+      this.extractor = pipeline("feature-extraction", this.modelName, { dtype: "q8" }) as unknown as Promise<Extractor>;
+    }
     const extract = await this.extractor;
     // Mean pooling averages the token vectors into one sentence vector; normalising it
     // makes cosine similarity a plain dot product.

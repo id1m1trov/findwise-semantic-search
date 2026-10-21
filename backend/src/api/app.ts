@@ -1,3 +1,4 @@
+import path from "node:path";
 import express, { type NextFunction, type Request, type Response } from "express";
 import { z } from "zod";
 import { maxPriceToCents, minPriceToCents } from "../catalog/catalog.js";
@@ -7,6 +8,8 @@ import type { SearchHit, SearchService } from "../search/searchService.js";
 export interface AppDependencies {
   repo: ProductRepository;
   searchService: SearchService;
+  /** Folder with the built frontend (index.html + assets); omitted in development and tests. */
+  staticDir?: string;
 }
 
 // Query-string values arrive as strings; "" (an empty form field) means "not set".
@@ -41,7 +44,30 @@ const toApiResult = ({ product, similarity, relevance }: SearchHit) => ({
   relevance,
 });
 
-export function createApp({ repo, searchService }: AppDependencies) {
+/**
+ * Serves the built React app (production only; in development Vite serves it). Hashed files
+ * under /assets never change, so browsers may cache them for a year; index.html is revalidated
+ * on every visit so a new deploy shows up immediately. Other page paths fall back to index.html.
+ */
+function serveFrontend(app: express.Express, staticDir: string) {
+  const indexFile = path.join(staticDir, "index.html");
+  app.use(
+    express.static(staticDir, {
+      setHeaders: (res, filePath) => {
+        const isHashedAsset = path.relative(staticDir, filePath).split(path.sep)[0] === "assets";
+        res.setHeader("Cache-Control", isHashedAsset ? "public, max-age=31536000, immutable" : "no-cache");
+      },
+    }),
+  );
+  app.use((req, res, next) => {
+    // Paths with a file extension are missing files, not pages: let them 404.
+    if ((req.method !== "GET" && req.method !== "HEAD") || path.extname(req.path)) return next();
+    res.setHeader("Cache-Control", "no-cache");
+    res.sendFile(indexFile);
+  });
+}
+
+export function createApp({ repo, searchService, staticDir }: AppDependencies) {
   const app = express();
   app.disable("x-powered-by");
 
@@ -83,6 +109,8 @@ export function createApp({ repo, searchService }: AppDependencies) {
   app.use("/api", (_req, res) => {
     res.status(404).json({ error: "Not found" });
   });
+
+  if (staticDir) serveFrontend(app, staticDir);
 
   // Express 5 forwards rejected promises from async handlers here.
   app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {

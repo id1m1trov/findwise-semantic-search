@@ -30,8 +30,14 @@ export function computeFingerprint(products: Product[], model: string, dimension
   return createHash("sha256").update(JSON.stringify({ model, dimension, items })).digest("hex");
 }
 
+// Embedding in small batches keeps peak memory low (it matters on a 512 MB host).
+const EMBED_BATCH_SIZE = 16;
+
 export async function buildIndex(products: Product[], embedder: Embedder): Promise<VectorIndex> {
-  const vectors = await embedder.embed(products.map(embeddingText));
+  const vectors: number[][] = [];
+  for (let i = 0; i < products.length; i += EMBED_BATCH_SIZE) {
+    vectors.push(...(await embedder.embed(products.slice(i, i + EMBED_BATCH_SIZE).map(embeddingText))));
+  }
   return VectorIndex.build(
     embedder.dimension,
     products.map((p, i) => ({ id: p.id, vector: vectors[i] })),
